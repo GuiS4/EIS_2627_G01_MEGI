@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Register - CourierFlow</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="loginstyle.css">
+    <link rel="stylesheet" href="registerstyle.css">
+    
+</head>
+
+<body>
+
+    <!-- TOP HEADER -->
+    <header class="top-header">
+
+        <a href="index.html" class="logo">
+            Courier<span>Flow</span>
+        </a>
+
+        <div class="header-actions">
+            <a href="index.html" class="btn btn-outline">Home</a>
+            <a href="login.html" class="btn btn-primary">Login</a>
+        </div>
+
+    </header>
+
+
+    <!-- REGISTER CONTENT -->
+    <main class="auth-main register-main">
+
+        <section class="auth-container register-container">
+
+            <div class="auth-card">
+
+                <div class="auth-heading">
+
+                    <p class="tag">CREATE YOUR ACCOUNT</p>
+
+                    <h1>Join CourierFlow</h1>
+
+                    <p>
+                        Create your account to access the Courier Management System.
+                    </p>
+
+                </div>
+
+
+                <form id="registerForm" novalidate>
+
+                    <!-- NAME -->
+                    <div class="form-group">
+
+                        <label for="name">Full name</label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            placeholder="John Smith"
+                        >
+
+                        <span class="error-message" id="nameError"></span>
+
+                    </div>
+
+
+                    <!-- USERNAME -->
+                    <div class="form-group">
+
+                        <label for="username">Username</label>
+
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            placeholder="johnsmith"
+                        >
+
+                        <span class="error-message" id="usernameError"></span>
+
+                    </div>
+
+
+                    <!-- EMAIL -->
+                    <div class="form-group">
+
+                        <label for="registerEmail">Email</label>
+
+                        <input
+                            type="email"
+                            id="registerEmail"
+                            name="email"
+                            placeholder="john@email.com"
+                        >
+
+                        <span class="error-message" id="registerEmailError"></span>
+
+                    </div>
+
+
+                    <!-- PHONE + NIF -->
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+
+                            <label for="phone">Phone</label>
+
+                            <input
+                                type="tel"
+                                id="phone"
+                                name="phone"
+                                placeholder="+351 912 345 678"
+                            >
+
+                            <span class="error-message" id="phoneError"></span>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="nif">NIF</label>
+
+                            <input
+                                type="text"
+                                id="nif"
+                                name="nif"
+                                placeholder="123456789"
+                            >
+
+                            <span class="error-message" id="nifError"></span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ROLE -->
+
+                    <div class="form-group">
+
+                        <label for="role">Account type</label>
+
+                        <select id="role" name="role">
+
+                            <option value="">Select your account type</option>
+
+                            <option value="client">
+                                Client
+                            </option>
+
+                            <option value="courier">
+                                Courier
+                            </option>
+
+                        </select>
+
+                        <span class="error-message" id="roleError"></span>
+
+                    </div>
+
+
+                    <!-- PASSWORD -->
+
+                    <div class="form-group">
+
+                        <label for="registerPassword">Password</label>
+
+                        <input
+                            type="password"
+                            id="registerPassword"
+                            name="password"
+                            placeholder="Minimum 6 characters"
+                        >
+
+                        <span class="error-message" id="registerPasswordError"></span>
+
+                    </div>
+
+
+                    <!-- CONFIRM PASSWORD -->
+
+                    <div class="form-group">
+
+                        <label for="confirmPassword">
+                            Confirm password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            placeholder="Repeat your password"
+                        >
+
+                        <span class="error-message" id="confirmPasswordError"></span>
+
+                    </div>
+
+
+                    <!-- SUBMIT -->
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary auth-button">
+
+                        Create account
+
+                    </button>
+
+                </form>
+
+
+                <div class="auth-footer">
+
+                    <p>
+                        Already have an account?
+                        <a href="login.html">Login</a>
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="main.js"></script>
+
+</body>
+
+</html>

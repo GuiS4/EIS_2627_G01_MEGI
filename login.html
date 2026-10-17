@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login - CourierFlow</title>
+
+    <link rel="stylesheet" href="loginstyle.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- TOP HEADER -->
+    <header class="top-header">
+
+        <a href="index.html" class="logo">
+            Courier<span>Flow</span>
+        </a>
+
+        <div class="header-actions">
+            <a href="index.html" class="btn btn-outline">Home</a>
+            <a href="register.html" class="btn btn-primary">Register</a>
+        </div>
+
+    </header>
+
+
+    <!-- LOGIN CONTENT -->
+    <main class="auth-main">
+
+        <section class="auth-container">
+
+            <div class="auth-card">
+
+                <div class="auth-heading">
+                    <p class="tag">WELCOME BACK</p>
+
+                    <h1>Login to CourierFlow</h1>
+
+                    <p>
+                        Enter your credentials to access your account.
+                    </p>
+                </div>
+
+
+                <form id="loginForm" novalidate>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="example@email.com"
+                        >
+
+                        <span class="error-message" id="emailError"></span>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                        >
+
+                        <span class="error-message" id="passwordError"></span>
+                    </div>
+
+
+                    <div class="form-options">
+
+                        <label class="remember">
+                            <input type="checkbox">
+                            Remember me
+                        </label>
+
+                        <a href="#">Forgot password?</a>
+
+                    </div>
+
+
+                    <button type="submit"
+                            class="btn btn-primary auth-button">
+                        Login
+                    </button>
+
+                </form>
+
+
+                <div class="auth-footer">
+
+                    <p>
+                        Don't have an account?
+                        <a href="register.html">Create an account</a>
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,153 @@
+/* ================================
+   AUTHENTICATION
+================================ */
+
+.auth-main {
+    margin-left: 0;
+    padding-top: 80px;
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f7f9fc;
+}
+
+.auth-container {
+    width: 90%;
+    max-width: 480px;
+}
+
+.auth-card {
+    background: white;
+
+    padding: 45px;
+
+    border: 1px solid #e7eaf0;
+    border-radius: 16px;
+
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06);
+}
+
+.auth-heading {
+    margin-bottom: 35px;
+}
+
+.auth-heading h1 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.auth-heading p:last-child {
+    color: #64748b;
+}
+
+
+/* FORM */
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+
+    padding: 13px 15px;
+
+    border: 1px solid #d8dee9;
+    border-radius: 8px;
+
+    font-size: 1rem;
+
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: #2563eb;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 25px;
+
+    font-size: 0.9rem;
+}
+
+.remember {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #64748b;
+}
+
+.form-options a,
+.auth-footer a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.form-options a:hover,
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+
+/* LOGIN BUTTON */
+
+.auth-button {
+    width: 100%;
+
+    border: none;
+    cursor: pointer;
+
+    font-size: 1rem;
+}
+
+
+/* ERROR */
+
+.error-message {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #dc2626;
+    font-size: 0.8rem;
+
+    min-height: 18px;
+}
+
+.input-error {
+    border-color: #dc2626 !important;
+}
+
+
+/* FOOTER */
+
+.auth-footer {
+    margin-top: 25px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #e7eaf0;
+
+    text-align: center;
+
+    color: #64748b;
+
+    font-size: 0.9rem;
+}

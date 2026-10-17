@@ -1,0 +1,37 @@
+/* ================================
+   REGISTER
+================================ */
+
+.register-main {
+    padding-top: 120px;
+    padding-bottom: 60px;
+}
+
+.register-container {
+    max-width: 600px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group select {
+    width: 100%;
+
+    padding: 13px 15px;
+
+    border: 1px solid #d8dee9;
+    border-radius: 8px;
+
+    background: white;
+
+    font-size: 1rem;
+
+    outline: none;
+}
+
+.form-group select:focus {
+    border-color: #2563eb;
+}

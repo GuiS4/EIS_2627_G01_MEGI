@@ -255,10 +255,7 @@ if (loginForm) {
             window.location.href = "client.html";
 
         } else if (user.role === "courier") {
-            alert(
-                "Login successful! Courier Dashboard " +
-                "will be available in the next step."
-            );
+            window.location.href = "courier.html";
 
         }
     });

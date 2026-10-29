@@ -346,7 +346,7 @@
                         </p>
 
                         <p class="map-caption">
-                            <span class="legend-dot pickup"></span> Pickup <span class="legend-dot dropoff"></span> Drop-off · Dashed line connects stops; it is not a driving route. No live GPS tracking.
+                            <span class="legend-dot pickup"></span> Pickup <span class="legend-dot dropoff"></span> Drop-off · Real driving route via OpenStreetMap (OSRM).
                         </p>
 
                     </div>
@@ -380,7 +380,7 @@
 
                 </div>
 
-                <div id="historyList" class="jobs-grid"></div>
+                <div id="historyList" class="history-accordion-list"></div>
 
             </section>
 
@@ -417,6 +417,39 @@
 
         </form>
 
+    </dialog>
+
+    <dialog id="signatureDialog" aria-labelledby="signatureTitle">
+        <div class="signature-dialog-content">
+            <h2 id="signatureTitle">Proof of Delivery (POD)</h2>
+            <p id="signatureInstruction">
+                Please collect the recipient's signature to complete delivery for <strong id="signatureOrderCode"></strong>.
+            </p>
+
+            <div class="signature-canvas-container">
+                <canvas id="signatureCanvas" width="450" height="180"></canvas>
+                <div class="signature-baseline" aria-hidden="true">
+                    <span>✕</span>
+                    <hr>
+                </div>
+                <button type="button" id="clearSignatureBtn" class="signature-clear-btn">
+                    ↺ Clear
+                </button>
+            </div>
+
+            <p id="signatureError" class="signature-error-msg" hidden>
+                ⚠ Signature is required. Cannot complete delivery without proof of delivery.
+            </p>
+
+            <div class="dialog-actions">
+                <button type="button" id="cancelSignatureBtn" class="btn btn-outline">
+                    Cancel
+                </button>
+                <button type="button" id="confirmSignatureBtn" class="btn btn-primary">
+                    Confirm delivery
+                </button>
+            </div>
+        </div>
     </dialog>
 
 </body>

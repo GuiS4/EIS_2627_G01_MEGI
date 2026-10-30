@@ -1,0 +1,437 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Client Dashboard - CourierFlow</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="loginstyle.css">
+    <link rel="stylesheet" href="registerstyle.css">
+    <link rel="stylesheet" href="clientstyle.css">
+    
+    
+    <!-- Leaflet CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzxZalw4pS6IXU5zFgkW5oYQRI="
+        crossorigin=""
+    >
+</head>
+
+<body>
+
+    <!-- TOP HEADER -->
+    <header class="top-header">
+
+        <a href="index.html" class="logo">
+            Courier<span>Flow</span>
+        </a>
+
+        <div class="header-actions">
+            <a href="index.html" class="btn btn-outline">
+                Home
+            </a>
+            <a href="login.html" class="btn btn-primary">
+                Logout
+            </a>
+        </div>
+
+    </header>
+
+    <!-- CLIENT SIDEBAR -->
+    <aside class="sidebar">
+
+        <nav>
+            <ul class="sidebar-links">
+
+                <li>
+                    <a href="#dashboard" class="active">
+                        Dashboard
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#products">
+                        Add Product
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#create-order">
+                        Create Order
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#orders">
+                        My Orders
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#history">
+                        Order History
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="client-main">
+
+        <div class="container">
+
+            <!-- DASHBOARD -->
+            <section id="dashboard" class="client-section">
+
+                <p class="tag">CLIENT AREA</p>
+
+                <h1>My Dashboard</h1>
+
+                <p class="client-intro">
+                    Manage your products, create deliveries
+                    and track your orders.
+                </p>
+
+                <div class="dashboard-grid">
+
+                    <div class="dashboard-card">
+                        <h3>Total Orders</h3>
+                        <strong>12</strong>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>Active Orders</h3>
+                        <strong>3</strong>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>Completed Orders</h3>
+                        <strong>9</strong>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>My Products</h3>
+                        <strong>4</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- PRODUCT REGISTRATION -->
+            <section id="products" class="client-section">
+
+                <h2>Register a Product</h2>
+
+                <p class="section-description">
+                    Add a product before creating a delivery.
+                </p>
+
+                <div class="content-card">
+
+                    <form id="productForm" novalidate>
+
+                        <div class="form-group">
+                            <label for="productDescription">
+                                Product Description
+                            </label>
+
+                            <input
+                                type="text"
+                                id="productDescription"
+                                placeholder="e.g. Laptop">
+
+                            <span class="error-message"
+                                  id="productDescriptionError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productCategory">
+                                Category
+                            </label>
+
+                            <select id="productCategory">
+                                <option value="">
+                                    Select category
+                                </option>
+                                <option value="electronics">
+                                    Electronics
+                                </option>
+                                <option value="clothing">
+                                    Clothing
+                                </option>
+                                <option value="documents">
+                                    Documents
+                                </option>
+                                <option value="other">
+                                    Other
+                                </option>
+                            </select>
+
+                            <span class="error-message"
+                                  id="productCategoryError"></span>
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+                                <label for="productWeight">
+                                    Weight (kg)
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="productWeight"
+                                    min="0.01"
+                                    step="0.01"
+                                    placeholder="2.5">
+
+                                <span class="error-message"
+                                      id="productWeightError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="productVolume">
+                                    Volume (m³)
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="productVolume"
+                                    min="0.001"
+                                    step="0.001"
+                                    placeholder="0.05">
+
+                                <span class="error-message"
+                                      id="productVolumeError"></span>
+                            </div>
+
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary">
+                            Add Product
+                        </button>
+
+                    </form>
+
+                    <p id="productSuccess"
+                       class="success-message"
+                       role="status"></p>
+
+                </div>
+
+            </section>
+
+                       
+            <!-- ORDER CREATION -->
+            <section id="create-order" class="client-section">
+
+                <h2>Create an Order</h2>
+
+                <p class="section-description">
+                    Select your products and define the
+                    pickup and delivery locations.
+                </p>
+
+                <div class="content-card">
+
+                    <form id="orderForm" novalidate>
+
+                        <!-- PRODUCT SELECTION -->
+                        <div class="form-group">
+
+                            <label>Select Products</label>
+
+                            <div id="productSelection"
+                                 class="product-selection">
+                                <p>
+                                    No products available.
+                                    Register a product first.
+                                </p>
+                            </div>
+
+                            <span class="error-message"
+                                  id="orderProductsError"></span>
+
+                        </div>
+
+                        <!-- ORIGIN -->
+                        <h3>Pickup Location</h3>
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+                                <label for="originLat">
+                                    Origin Latitude
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="originLat"
+                                    step="any"
+                                    placeholder="41.1780">
+
+                                <span class="error-message"
+                                      id="originLatError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="originLng">
+                                    Origin Longitude
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="originLng"
+                                    step="any"
+                                    placeholder="-8.5980">
+
+                                <span class="error-message"
+                                      id="originLngError"></span>
+                            </div>
+
+                        </div>
+
+                        <!-- DESTINATION -->
+                        <h3>Delivery Location</h3>
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+                                <label for="destLat">
+                                    Destination Latitude
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="destLat"
+                                    step="any"
+                                    placeholder="41.1496">
+
+                                <span class="error-message"
+                                      id="destLatError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="destLng">
+                                    Destination Longitude
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="destLng"
+                                    step="any"
+                                    placeholder="-8.6109">
+
+                                <span class="error-message"
+                                      id="destLngError"></span>
+                            </div>
+
+                        </div>
+
+                        <!-- MAP -->
+                        <h3>Delivery Map</h3>
+
+                        <p class="section-description">
+                            Enter GPS coordinates and click
+                            Preview Route.
+                        </p>
+
+                        <div id="orderMap"></div>
+
+                        <div class="order-actions">
+
+                            <button
+                                type="button"
+                                id="previewRoute"
+                                class="btn btn-outline">
+                                Preview Route
+                            </button>
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary">
+                                Create Order
+                            </button>
+
+                        </div>
+
+                        <p id="orderSuccess"
+                           class="success-message"
+                           role="status"></p>
+
+                    </form>
+
+                </div>
+
+            </section>
+
+
+            
+            <!-- ACTIVE ORDERS -->
+            <section id="orders" class="client-section">
+
+                <h2>My Orders</h2>
+
+                <p class="section-description">
+                    View and track your active deliveries.
+                </p>
+
+                <div class="content-card">
+
+                    <div id="ordersList">
+                        <p>No active orders yet.</p>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ORDER HISTORY -->
+            <section id="history" class="client-section">
+
+                <h2>Order History</h2>
+
+                <p class="section-description">
+                    View your completed and cancelled deliveries.
+                </p>
+
+                <div class="content-card">
+
+                    <div id="orderHistoryList">
+                        <p>No completed orders yet.</p>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+        </div>
+
+    </main>
+
+    <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin="">
+    </script>
+
+    <script src="main.js"></script>
+    <script src="client.js"></script>
+
+</body>
+</html>

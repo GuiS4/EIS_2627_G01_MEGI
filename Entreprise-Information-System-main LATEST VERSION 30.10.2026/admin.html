@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="CourierFlow — manage couriers, parcels and vehicles.">
+
+    <title>Admin dashboard — CourierFlow</title>
+
+    <link rel="stylesheet" href="adminstyle.css">
+
+    <script defer src="admin.js"></script>
+
+</head>
+
+<body>
+
+    <a class="skip-link" href="#main">
+        Skip to content
+    </a>
+
+    <!-- TOP HEADER -->
+
+    <header class="top-header">
+
+        <a href="admin.html" class="logo">
+            Courier<span>Flow</span>
+        </a>
+
+        <div class="header-actions">
+
+            <a href="login.html" class="btn btn-primary">
+                Logout
+            </a>
+
+            <span class="workspace-label">Admin dashboard</span>
+
+            <span class="avatar" aria-hidden="true">AD</span>
+
+        </div>
+
+    </header>
+
+    <!-- ADMIN SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <p class="nav-label">
+            OPERATIONS WORKSPACE
+        </p>
+
+        <nav aria-label="Main navigation">
+
+            <a href="#overview" data-nav="overview">
+                <span aria-hidden="true">▦</span> Overview
+            </a>
+
+            <a href="#couriers" data-nav="couriers">
+                <span aria-hidden="true">♙</span> Couriers <b id="navCount">0</b>
+            </a>
+
+            <a href="#parcels" data-nav="parcels">
+                <span aria-hidden="true">□</span> Parcels
+            </a>
+
+            <a href="#fleet" data-nav="fleet">
+                <span aria-hidden="true">↗</span> Vehicles
+            </a>
+
+        </nav>
+
+        <div class="sidebar-note">
+
+            <strong>Your operations hub</strong>
+
+            <p>
+                Couriers, parcels and vehicles in one place.
+            </p>
+
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+
+    <main id="main" tabindex="-1">
+
+        <div class="container">
+
+            <!-- OVERVIEW -->
+
+            <section id="overview">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <p class="tag">
+                            ADMIN AREA / OVERVIEW
+                        </p>
+
+                        <h1>Every delivery, under control.</h1>
+
+                        <p class="description">
+                            Manage your team and assign resources to the next delivery.
+                        </p>
+
+                    </div>
+
+                    <button class="btn btn-primary" id="addCourier">
+                        ＋ Add courier
+                    </button>
+
+                </div>
+
+                <div class="dashboard-grid" id="stats"></div>
+
+            </section>
+
+            <!-- COURIERS -->
+
+            <section id="couriers">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <p class="tag">
+                            YOUR TEAM
+                        </p>
+
+                        <h2>Couriers</h2>
+
+                        <p class="description">
+                            Contact details, current parcels and assigned vehicle.
+                        </p>
+
+                    </div>
+
+                    <span class="region-label">Porto, Portugal</span>
+
+                </div>
+
+                <div class="toolbar">
+
+                    <label class="search-field">
+                        Search couriers
+                        <input
+                            id="courierSearch"
+                            type="search"
+                            placeholder="Name, phone number or email…">
+                    </label>
+
+                    <label>
+                        Status
+                        <select id="courierFilter">
+
+                            <option value="all">All couriers</option>
+
+                            <option value="available">Available</option>
+
+                            <option value="busy">On delivery</option>
+
+                            <option value="offline">Unavailable</option>
+
+                        </select>
+                    </label>
+
+                </div>
+
+                <div id="courierList" class="courier-grid"></div>
+
+            </section>
+
+            <!-- PARCEL ASSIGNMENTS -->
+
+            <section id="parcels">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <p class="tag">
+                            DELIVERY ASSIGNMENTS
+                        </p>
+
+                        <h2>Parcels</h2>
+
+                        <p class="description">
+                            See who is handling each delivery and update assignments.
+                        </p>
+
+                    </div>
+
+                    <label>
+                        Status
+                        <select id="parcelFilter">
+
+                            <option value="all">All parcels</option>
+
+                            <option value="unassigned">Unassigned</option>
+
+                            <option value="accepted">Accepted</option>
+
+                            <option value="picked_up">Picked up</option>
+
+                            <option value="delivered">Delivered</option>
+
+                        </select>
+                    </label>
+
+                </div>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <caption class="sr-only">
+                            Parcels and assigned couriers
+                        </caption>
+
+                        <thead>
+
+                            <tr>
+
+                                <th scope="col">
+                                    Parcel
+                                </th>
+
+                                <th scope="col">
+                                    Route
+                                </th>
+
+                                <th scope="col">
+                                    Status
+                                </th>
+
+                                <th scope="col">
+                                    Courier
+                                </th>
+
+                                <th scope="col">
+                                    Assignment
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="parcelList"></tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+            <!-- VEHICLE FLEET -->
+
+            <section id="fleet">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <p class="tag">
+                            TEAM RESOURCES
+                        </p>
+
+                        <h2>Vehicles</h2>
+
+                        <p class="description">
+                            One vehicle, one courier. See current assignments at a glance.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div id="vehicleList" class="vehicle-grid"></div>
+
+            </section>
+
+            <footer>
+                CourierFlow
+                <button id="resetDemo" class="text-button">
+                    Reset demo data
+                </button>
+                <span>Admin dashboard · Local demonstration</span>
+            </footer>
+
+        </div>
+
+    </main>
+
+    <!-- COURIER EDITOR -->
+
+    <dialog id="courierDialog" aria-labelledby="courierTitle">
+
+        <form id="courierForm">
+
+            <div class="dialog-heading">
+
+                <h2 id="courierTitle">Add courier</h2>
+
+                <button type="button" class="icon-button" data-close="courierDialog" aria-label="Close">
+                    ×
+                </button>
+
+            </div>
+
+            <input type="hidden" name="id">
+
+            <label>
+                Full name
+                <input
+                    name="name"
+                    required
+                    maxlength="80"
+                    autocomplete="name">
+            </label>
+
+            <div class="form-row">
+
+                <label>
+                    Phone number
+                    <input
+                        name="phone"
+                        type="tel"
+                        required
+                        maxlength="30"
+                        pattern="[+0-9() .-]{5,30}"
+                        title="Enter a phone number using digits, spaces and an optional + sign."
+                        autocomplete="tel">
+                </label>
+
+                <label>
+                    Email
+                    <input
+                        name="email"
+                        type="email"
+                        required
+                        maxlength="120"
+                        autocomplete="email">
+                </label>
+
+            </div>
+
+            <label>
+                Availability
+                <select name="status">
+
+                    <option value="available">Available</option>
+
+                    <option value="busy">On delivery</option>
+
+                    <option value="offline">Unavailable</option>
+
+                </select>
+            </label>
+
+            <p id="formError" class="form-error" role="alert"></p>
+
+            <div class="dialog-actions">
+
+                <button type="button" class="btn btn-outline" data-close="courierDialog">
+                    Cancel
+                </button>
+
+                <button type="submit" class="btn btn-primary">
+                    Save courier
+                </button>
+
+            </div>
+
+        </form>
+
+    </dialog>
+
+    <!-- ASSIGNMENT EDITOR -->
+
+    <dialog id="assignmentDialog" aria-labelledby="assignmentTitle">
+
+        <form id="assignmentForm">
+
+            <div class="dialog-heading">
+
+                <h2 id="assignmentTitle">Change assignment</h2>
+
+                <button
+                    type="button"
+                    class="icon-button"
+                    data-close="assignmentDialog"
+                    aria-label="Close">
+                    ×
+                </button>
+
+            </div>
+
+            <p id="assignmentDescription" class="description"></p>
+
+            <input type="hidden" name="kind">
+
+            <input type="hidden" name="target">
+
+            <label id="assignmentLabel">
+                Choose assignment
+                <select name="selection" id="assignmentSelect"></select>
+            </label>
+
+            <p id="assignmentError" class="form-error" role="alert"></p>
+
+            <div class="dialog-actions">
+
+                <button type="button" class="btn btn-outline" data-close="assignmentDialog">
+                    Cancel
+                </button>
+
+                <button type="submit" class="btn btn-primary">
+                    Save assignment
+                </button>
+
+            </div>
+
+        </form>
+
+    </dialog>
+
+    <!-- CONFIRMATION -->
+
+    <dialog id="confirmDialog" aria-labelledby="confirmTitle">
+
+        <form method="dialog">
+
+            <h2 id="confirmTitle">Confirm action</h2>
+
+            <p id="confirmText" class="description"></p>
+
+            <div class="dialog-actions">
+
+                <button class="btn btn-outline" value="cancel">
+                    Cancel
+                </button>
+
+                <button class="btn btn-primary" value="confirm">
+                    Confirm
+                </button>
+
+            </div>
+
+        </form>
+
+    </dialog>
+
+    <div id="toast" role="status" aria-live="polite" class="toast" hidden></div>
+
+</body>
+
+</html>

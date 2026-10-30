@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="Courier page.">
+
+    <title>Courier Dashboard — CourierFlow</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="login.css">
+
+    <link rel="stylesheet" href="register.css">
+
+    <link rel="stylesheet" href="client.css">
+
+    <link rel="stylesheet" href="courier.css">
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin="">
+
+    <script
+        defer
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
+    <script defer src="courier.js"></script>
+
+</head>
+
+<body>
+
+    <a class="skip-link" href="#main">
+        Skip to content
+    </a>
+
+    <!-- TOP HEADER -->
+
+    <header class="top-header">
+
+        <a href="index.html" class="logo">
+            Courier<span>Flow</span>
+        </a>
+
+        <div class="header-actions">
+
+            <a href="index.html" class="btn btn-outline">
+                Home
+            </a>
+
+            <a href="login.html" class="btn btn-primary">
+                Logout
+            </a>
+
+        </div>
+
+    </header>
+
+    <!-- COURIER SIDEBAR -->
+    <aside class="sidebar">
+
+        <p class="nav-label">
+            COURIER WORKSPACE
+        </p>
+
+        <nav aria-label="Main navigation">
+
+            <ul class="sidebar-links">
+
+                <li>
+
+                    <a href="#dashboard" data-section="dashboard">
+                        <span aria-hidden="true">▦</span> Dashboard
+                    </a>
+
+                </li>
+
+                <li>
+
+                    <a href="#available" data-section="available">
+                        <span aria-hidden="true">＋</span> Available jobs <b id="availableCount">0</b>
+                    </a>
+
+                </li>
+
+                <li>
+
+                    <a href="#active" data-section="active">
+                        <span aria-hidden="true">↗</span> My deliveries <b id="activeCount">0</b>
+                    </a>
+
+                </li>
+
+                <li>
+
+                    <a href="#history" data-section="history">
+                        <span aria-hidden="true">◷</span> Delivery history
+                    </a>
+
+                </li>
+
+            </ul>
+
+        </nav>
+
+        <div class="sidebar-note">
+
+            <strong>Your local workspace</strong>
+
+            <p>
+                Sample deliveries in Porto.<br>No real orders are dispatched.
+            </p>
+
+            <button class="text-button" id="resetDemo">
+                Reset demo data
+            </button>
+
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main id="main" class="courier-main" tabindex="-1">
+
+        <div class="container">
+
+            <div class="demo-notice">
+
+                <strong>DEMO MODE</strong>
+
+                <span>Sample data · No backend · Changes saved in this browser only.</span>
+
+            </div>
+
+            <p id="storageWarning" class="warning" role="status" hidden></p>
+
+            <noscript>
+
+                <p class="warning">
+                    Enable JavaScript to manage demo deliveries.
+                </p>
+
+            </noscript>
+
+            <!-- DASHBOARD -->
+            <section id="dashboard" class="courier-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <p class="tag">
+                            COURIER AREA / OVERVIEW
+                        </p>
+
+                        <h1>Your day, delivered.</h1>
+
+                        <p class="courier-intro">
+                            Find your next job and keep every delivery moving.
+                        </p>
+
+                    </div>
+
+                    <a href="#available" class="btn btn-primary">
+                        Find a delivery <span aria-hidden="true">↗</span>
+                    </a>
+
+                </div>
+
+                <div class="dashboard-grid">
+
+                    <div class="dashboard-card">
+
+                        <h3>Available jobs</h3>
+
+                        <strong id="statAvailable">0</strong>
+
+                        <p>
+                            Ready to accept
+                        </p>
+
+                    </div>
+
+                    <div class="dashboard-card">
+
+                        <h3>Active deliveries</h3>
+
+                        <strong id="statActive">0</strong>
+
+                        <p>
+                            Assigned to you
+                        </p>
+
+                    </div>
+
+                    <div class="dashboard-card">
+
+                        <h3>Completed deliveries</h3>
+
+                        <strong id="statCompleted">0</strong>
+
+                        <p>
+                            All-time demo total
+                        </p>
+
+                    </div>
+
+                    <div class="dashboard-card">
+
+                        <h3>Delivery earnings</h3>
+
+                        <strong id="statEarnings">€0.00</strong>
+
+                        <p>
+                            Completed jobs · demo only
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- AVAILABLE JOBS -->
+            <section id="available" class="courier-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <p class="tag">
+                            YOUR NEXT STOP
+                        </p>
+
+                        <h2>Available jobs</h2>
+
+                        <p class="section-description">
+                            Review pickup details before accepting a delivery.
+                        </p>
+
+                    </div>
+
+                    <span class="region-label">Porto, Portugal</span>
+
+                </div>
+
+                <div class="toolbar">
+
+                    <label class="search-field">
+                        Search jobs<input id="jobSearch" type="search" placeholder="Search ID, address or package…">
+                    </label>
+
+                    <label>
+                        Sort by<select id="jobSort"><option value="id">Job number</option><option value="pay">Highest fee</option><option value="weight">Lightest package</option></select>
+                    </label>
+
+                </div>
+
+                <div id="availableList" class="jobs-grid"></div>
+
+            </section>
+
+            <!-- ACTIVE DELIVERIES -->
+            <section id="active" class="courier-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <p class="tag">
+                            ON THE MOVE
+                        </p>
+
+                        <h2>My active deliveries</h2>
+
+                        <p class="section-description">
+                            Open a delivery to view its stops and update its status.
+                        </p>
+
+                    </div>
+
+                    <label class="compact-label">
+                        Status<select id="activeFilter"><option value="all">All active</option><option value="accepted">Accepted</option><option value="picked_up">Picked up</option></select>
+                    </label>
+
+                </div>
+
+                <div id="activeList" class="jobs-grid"></div>
+
+            </section>
+
+            <!-- DELIVERY DETAILS -->
+            <section id="details" class="courier-section" aria-labelledby="detailsHeading">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <p class="tag">
+                            DELIVERY WORKSPACE
+                        </p>
+
+                        <h2 id="detailsHeading">Delivery details</h2>
+
+                        <p class="section-description">
+                            Pickup, drop-off and progress in one place.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="detail-layout">
+
+                    <article id="deliveryDetails" class="content-card" aria-live="polite"></article>
+
+                    <div class="content-card map-card">
+
+                        <div class="map-heading">
+
+                            <h3>Delivery map</h3>
+
+                            <button id="fitMap" class="btn btn-outline">
+                                Fit stops
+                            </button>
+
+                        </div>
+
+                        <div
+                            id="deliveryMap"
+                            role="region"
+                            aria-label="Map showing pickup and delivery locations"></div>
+
+                        <p id="mapMessage" class="map-caption" role="status">
+                            Loading map…
+                        </p>
+
+                        <p class="map-caption">
+                            <span class="legend-dot pickup"></span> Pickup <span class="legend-dot dropoff"></span> Drop-off · Real driving route via OpenStreetMap (OSRM).
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- DELIVERY HISTORY -->
+            <section id="history" class="courier-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <p class="tag">
+                            A JOB WELL DONE
+                        </p>
+
+                        <h2>Delivery history</h2>
+
+                        <p class="section-description">
+                            Your completed deliveries, newest first.
+                        </p>
+
+                    </div>
+
+                    <label class="search-field">
+                        Search history<input id="historySearch" type="search" placeholder="Search ID or address…">
+                    </label>
+
+                </div>
+
+                <div id="historyList" class="history-accordion-list"></div>
+
+            </section>
+
+            <!-- FOOTER -->
+            <footer>
+                CourierFlow <span>Courier workspace · Local demonstration</span>
+            </footer>
+
+        </div>
+
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <dialog id="confirmDialog" aria-labelledby="confirmTitle">
+
+        <form method="dialog">
+
+            <h2 id="confirmTitle">Confirm delivery</h2>
+
+            <p id="confirmText"></p>
+
+            <div class="dialog-actions">
+
+                <button class="btn btn-outline" value="cancel">
+                    Cancel
+                </button>
+
+                <button id="confirmButton" class="btn btn-primary" value="confirm">
+                    Confirm
+                </button>
+
+            </div>
+
+        </form>
+
+    </dialog>
+
+    <dialog id="signatureDialog" aria-labelledby="signatureTitle">
+        <div class="signature-dialog-content">
+            <h2 id="signatureTitle">Proof of Delivery (POD)</h2>
+            <p id="signatureInstruction">
+                Please collect the recipient's signature to complete delivery for <strong id="signatureOrderCode"></strong>.
+            </p>
+
+            <div class="signature-canvas-container">
+                <canvas id="signatureCanvas" width="450" height="180"></canvas>
+                <div class="signature-baseline" aria-hidden="true">
+                    <span>✕</span>
+                    <hr>
+                </div>
+                <button type="button" id="clearSignatureBtn" class="signature-clear-btn">
+                    ↺ Clear
+                </button>
+            </div>
+
+            <p id="signatureError" class="signature-error-msg" hidden>
+                ⚠ Signature is required. Cannot complete delivery without proof of delivery.
+            </p>
+
+            <div class="dialog-actions">
+                <button type="button" id="cancelSignatureBtn" class="btn btn-outline">
+                    Cancel
+                </button>
+                <button type="button" id="confirmSignatureBtn" class="btn btn-primary">
+                    Confirm delivery
+                </button>
+            </div>
+        </div>
+    </dialog>
+
+</body>
+
+</html>

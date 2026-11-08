@@ -1,0 +1,323 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Vehicles - CourierFlow</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/vehicles.css">
+
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="top-header">
+
+        <a href="index.html" class="logo">
+            Courier<span>Flow</span>
+        </a>
+
+        <div class="header-actions">
+            <a href="courier.html" class="btn btn-outline">
+                Courier Dashboard
+            </a>
+
+            <a href="login.html" class="btn btn-primary">
+                Logout
+            </a>
+        </div>
+
+    </header>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <nav>
+            <ul class="sidebar-links">
+
+                <li>
+                    <a href="courier.html">
+                        Dashboard
+                    </a>
+                </li>
+
+                <li>
+                    <a href="courier.html#available">
+                        Available Jobs
+                    </a>
+                </li>
+
+                <li>
+                    <a href="courier.html#active">
+                        My Deliveries
+                    </a>
+                </li>
+
+                <li>
+                    <a href="vehicles.html" class="active">
+                        My Vehicles
+                    </a>
+                </li>
+
+                <li>
+                    <a href="courier.html#history">
+                        Delivery History
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="vehicles-main">
+
+        <div class="container">
+
+            <!-- TITLE -->
+            <section class="vehicles-heading">
+
+                <p class="tag">COURIER AREA</p>
+
+                <h1>Vehicle Management</h1>
+
+                <p>
+                    Register and manage your vehicles,
+                    capacities and required documents.
+                </p>
+
+            </section>
+
+            <!-- STATISTICS -->
+            <section class="vehicle-stats">
+
+                <div class="vehicle-stat-card">
+                    <h3>Total Vehicles</h3>
+                    <strong id="totalVehicles">0</strong>
+                </div>
+
+                <div class="vehicle-stat-card">
+                    <h3>Approved Vehicles</h3>
+                    <strong id="approvedVehicles">0</strong>
+                </div>
+
+                <div class="vehicle-stat-card">
+                    <h3>Pending Approval</h3>
+                    <strong id="pendingVehicles">0</strong>
+                </div>
+
+            </section>
+
+            <!-- ADD VEHICLE -->
+            <section class="vehicle-section">
+
+                <h2>Register a Vehicle</h2>
+
+                <p class="section-description">
+                    Fill in the vehicle information
+                    and submit it for staff approval.
+                </p>
+
+                <div class="vehicle-card">
+
+                    <form id="vehicleForm" novalidate>
+
+                        <!-- VEHICLE TYPE -->
+                        <div class="form-group">
+
+                            <label for="vehicleType">
+                                Vehicle Type
+                            </label>
+
+                            <select id="vehicleType" required>
+                                <option value="">
+                                    Select vehicle type
+                                </option>
+                                <option value="Bike">Bike</option>
+                                <option value="Moto">Moto</option>
+                                <option value="Van">Van</option>
+                                <option value="Truck">Truck</option>
+                            </select>
+
+                        </div>
+
+                        <!-- MODEL -->
+                        <div class="form-group">
+
+                            <label for="vehicleModel">
+                                Vehicle Model
+                            </label>
+
+                            <input
+                                type="text"
+                                id="vehicleModel"
+                                placeholder="e.g. Mercedes Sprinter"
+                                required>
+                        </div>
+
+                        <!-- LICENSE PLATE -->
+                        <div class="form-group">
+
+                            <label for="licensePlate">
+                                License Plate
+                            </label>
+
+                            <input
+                                type="text"
+                                id="licensePlate"
+                                placeholder="e.g. AB-12-CD"
+                                required>
+                        </div>
+
+                        <!-- CAPACITIES -->
+                        <div class="vehicle-form-row">
+
+                            <div class="form-group">
+
+                                <label for="maxWeight">
+                                    Maximum Weight (kg)
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="maxWeight"
+                                    min="0.01"
+                                    step="any"
+                                    placeholder="1200"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+
+                                <label for="maxVolume">
+                                    Maximum Volume (m³)
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="maxVolume"
+                                    min="0.001"
+                                    step="any"
+                                    placeholder="12"
+                                    required>
+                            </div>
+
+                        </div>
+
+                        <!-- DOCUMENTS -->
+                        <h3>Vehicle Documents</h3>
+
+                        <div class="vehicle-form-row">
+
+                            <div class="form-group">
+
+                                <label for="insuranceExpiry">
+                                    Insurance Expiry Date
+                                </label>
+
+                                <input
+                                    type="date"
+                                    id="insuranceExpiry"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+
+                                <label for="inspectionExpiry">
+                                    Inspection Expiry Date
+                                </label>
+
+                                <input
+                                    type="date"
+                                    id="inspectionExpiry"
+                                    required>
+                            </div>
+
+                        </div>
+
+                        <!-- FILE UPLOAD -->
+                        <div class="vehicle-form-row">
+
+                            <div class="form-group">
+
+                                <label for="insuranceDoc">
+                                    Insurance Certificate
+                                </label>
+
+                                <input
+                                    type="file"
+                                    id="insuranceDoc"
+                                    accept=".pdf,.png,.jpg,.jpeg"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+
+                                <label for="inspectionDoc">
+                                    Inspection Certificate
+                                </label>
+
+                                <input
+                                    type="file"
+                                    id="inspectionDoc"
+                                    accept=".pdf,.png,.jpg,.jpeg"
+                                    required>
+                            </div>
+
+                        </div>
+
+                        <p class="vehicle-note">
+                            Demo mode: only document filenames are
+                            recorded. Files are not uploaded or stored.
+                        </p>
+
+                        <p id="vehicleMessage"
+                           class="vehicle-message"
+                           role="status"
+                           aria-live="polite"></p>
+
+                        <button type="submit"
+                                class="btn btn-primary">
+                            Register Vehicle
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </section>
+
+            <!-- REGISTERED VEHICLES -->
+            <section class="vehicle-section">
+
+                <h2>My Registered Vehicles</h2>
+
+                <p class="section-description">
+                    Review the approval status and
+                    document validity of your vehicles.
+                </p>
+
+                <div id="vehiclesList"
+                     class="vehicles-list">
+
+                    <p>No vehicles registered yet.</p>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+    <script src="js/vehicles.js"></script>
+
+</body>
+</html>

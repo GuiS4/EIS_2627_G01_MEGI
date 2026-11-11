@@ -1,6 +1,6 @@
 /* CourierFlow: adapted from the supplied client dashboard styles.
    Self-contained base styles replace missing style/login/register CSS. */
-   :root {
+:root {
     --ink: #172033;
     --muted: #64748b;
     --blue: #1d4ed8;
@@ -416,15 +416,32 @@ label {
     font-weight: 600
 }
 
-input,
-select {
+input {
     min-height: 43px;
     border: 1px solid #d8dee9;
     border-radius: 7px;
     background: white;
     color: var(--ink);
     padding: 10px 12px;
-    max-width: 100%
+    max-width: 100%;
+}
+
+select {
+    min-height: 43px;
+    border: 1px solid #d8dee9;
+    border-radius: 7px;
+    background-color: white;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23172033' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 14px 14px;
+    color: var(--ink);
+    padding: 10px 40px 10px 12px;
+    max-width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
 }
 
 .search-field {
@@ -521,27 +538,37 @@ select {
 
 .order-status {
     display: inline-block;
+    margin: 0;
     padding: 5px 10px;
     background: #dbeafe;
     color: #1d4ed8;
     border-radius: 20px;
     font-size: 11px;
-    font-weight: 650
+    font-weight: 650;
 }
 
 .status-available {
     background: #f1f5f9;
-    color: #475569
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.status-accepted {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
 }
 
 .status-picked_up {
     background: #fef3c7;
-    color: #92400e
+    color: #92400e;
+    border: 1px solid #fde68a;
 }
 
 .status-delivered {
     background: #dcfce7;
-    color: #166534
+    color: #166534;
+    border: 1px solid #bbf7d0;
 }
 
 .empty-state {
@@ -558,6 +585,75 @@ select {
     display: block;
     color: var(--ink);
     margin-bottom: 5px
+}
+
+.active-deliverables-layout {
+    display: grid;
+    grid-template-columns: minmax(320px, 420px) minmax(460px, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.active-list-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.active-toolbar {
+    display: flex;
+    align-items: center;
+}
+
+.active-toolbar .compact-label {
+    width: 100%;
+}
+
+.active-toolbar select {
+    width: 100%;
+}
+
+.active-deliverables-layout .map-card {
+    position: sticky;
+    top: 100px;
+    padding: 22px;
+    z-index: 10;
+}
+
+.active-deliverables-layout #deliveryMap {
+    height: 480px;
+    max-height: calc(100vh - 270px);
+    min-height: 340px;
+}
+
+.active-deliverables-layout .history-summary {
+    padding: 14px 16px;
+    gap: 10px 12px;
+}
+
+.active-deliverables-layout .history-summary-left {
+    min-width: auto;
+}
+
+.active-deliverables-layout .history-summary-right {
+    gap: 8px 10px;
+}
+
+.active-deliverables-layout .history-summary-right .history-date {
+    font-size: 12px;
+}
+
+.active-deliverables-layout .history-stops-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.active-deliverables-layout .history-body {
+    padding: 16px 18px;
+}
+
+.history-package-meta {
+    margin: 0 0 14px 0;
 }
 
 .detail-layout {
@@ -661,6 +757,18 @@ select {
 
 .detail-action {
     width: 100%
+}
+
+.active-action-container {
+    margin: 8px 0 16px 0;
+}
+
+.active-action-container .btn {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 650;
+    border-radius: 8px;
 }
 
 .timeline {
@@ -861,7 +969,7 @@ dialog p {
     font-weight: 600;
     color: #475569;
     cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: 0.15s ease;
 }
 
@@ -884,6 +992,8 @@ dialog p {
     background: #f8fafc;
     border: 1px solid var(--line);
     border-radius: 10px;
+    width: fit-content;
+    max-width: 100%;
 }
 
 .proof-card h4 {
@@ -1019,12 +1129,16 @@ dialog p {
     flex-wrap: wrap;
 }
 
-/* Ensure badge and pill share the same line-height so they sit on the same baseline */
+/* Reset margin from client.css and match pill alignment/height */
 .history-summary-right .order-status,
 .history-summary-right .pod-pill {
     display: inline-flex;
     align-items: center;
-    line-height: 1;
+    margin: 0;
+    padding: 4px 10px;
+    line-height: 1.2;
+    height: 24px;
+    box-sizing: border-box;
 }
 
 .history-date {
@@ -1034,12 +1148,12 @@ dialog p {
 
 .pod-pill {
     font-size: 11px;
-    font-weight: 700;
-    color: #047857;
-    background: #d1fae5;
-    border: 1px solid #a7f3d0;
-    padding: 3px 8px;
-    border-radius: 12px;
+    font-weight: 650;
+    color: #166534;
+    background: #dcfce7;
+    border: 1px solid #bbf7d0;
+    padding: 4px 10px;
+    border-radius: 20px;
 }
 
 .history-body {
@@ -1058,26 +1172,43 @@ dialog p {
 
 .history-details-bottom {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr;
     align-items: start;
-    gap: 20px;
+    gap: 24px;
     padding-top: 16px;
     border-top: 1px dashed var(--line);
 }
 
 .history-pod-box {
     margin-top: 0;
+    justify-self: start;
 }
 
-/* Unified heading style for both Timeline and POD boxes */
-.history-timeline-box h4,
-.history-pod-box h4 {
-    font-size: 13px;
+/* Match .proof-card top border + padding (17px) and .stop left indent (30px) */
+.history-timeline-box {
+    padding: 17px 0 0 30px;
+}
+
+.history-timeline-box .timeline {
+    margin-top: 8px;
+}
+
+/* Unified typography across all sections inside .history-body */
+.history-body h4 {
+    font-size: 12px;
     font-weight: 650;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 8px;
+    margin: 0 0 8px;
+}
+
+.history-body p,
+.history-body .stop .subtle,
+.history-body .timeline,
+.history-body .timeline p {
+    font-size: 13px;
+    line-height: 1.45;
 }
 
 .history-action-box {
@@ -1086,7 +1217,8 @@ dialog p {
 
 /* ── History mini-map ─────────────────────────────────────── */
 .history-mini-map-box {
-    grid-column: 1 / -1;   /* full width across the bottom grid */
+    grid-column: 1 / -1;
+    /* full width across the bottom grid */
     border-radius: 10px;
     overflow: hidden;
     border: 1px solid var(--line);
@@ -1104,6 +1236,7 @@ dialog p {
 .history-mini-map .leaflet-container {
     cursor: default !important;
 }
+
 .history-mini-map .leaflet-drag-target {
     cursor: default !important;
 }
@@ -1114,13 +1247,17 @@ dialog p {
         align-items: flex-start;
         gap: 8px;
     }
-    .history-summary-middle, .history-summary-right {
+
+    .history-summary-middle,
+    .history-summary-right {
         width: 100%;
         justify-content: space-between;
     }
+
     .history-stops-grid {
         grid-template-columns: 1fr;
     }
+
     .history-details-bottom {
         grid-template-columns: 1fr;
     }
@@ -1151,8 +1288,13 @@ footer span {
         grid-template-columns: repeat(2, 1fr)
     }
 
+    .active-deliverables-layout,
     .detail-layout {
-        grid-template-columns: 1fr
+        grid-template-columns: 1fr;
+    }
+
+    .active-deliverables-layout .map-card {
+        position: static;
     }
 
     .container {

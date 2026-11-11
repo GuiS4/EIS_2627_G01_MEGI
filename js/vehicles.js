@@ -314,6 +314,10 @@ function renderVehicles() {
             ["Inspection File", vehicle.inspection_expiry_doc]
         ];
 
+        if (vehicle.approved_by) {
+            fields.push(["Reviewed By", vehicle.approved_by]);
+        }
+
         fields.forEach(function(field) {
 
             const wrapper = document.createElement("div");

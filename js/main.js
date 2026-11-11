@@ -222,6 +222,17 @@ if (loginForm) {
             return;
         }
 
+        // Administrator demo access
+        if (email === "admin@admin.demo" && password === "Admin123!") {
+            sessionStorage.removeItem("cms_current_user");
+            sessionStorage.setItem("courierflow.demo.role", "admin");
+            window.location.href = "admin.html";
+            return;
+        }
+
+        // Clear any previous administrator demo session
+        sessionStorage.removeItem("courierflow.demo.role");
+
         const users = getUsers();
 
         const user = users.find(function(savedUser) {
@@ -258,6 +269,30 @@ if (loginForm) {
             window.location.href = "courier.html";
 
         }
+    });
+}
+
+// Password visibility toggle
+const togglePasswordBtn = document.getElementById("togglePassword");
+const passwordInput = document.getElementById("password");
+
+if (togglePasswordBtn && passwordInput) {
+    togglePasswordBtn.addEventListener("click", function() {
+        const isPassword = passwordInput.type === "password";
+        passwordInput.type = isPassword ? "text" : "password";
+
+        const eyeIcon = togglePasswordBtn.querySelector(".eye-icon");
+        const eyeOffIcon = togglePasswordBtn.querySelector(".eye-off-icon");
+
+        if (eyeIcon && eyeOffIcon) {
+            eyeIcon.style.display = isPassword ? "none" : "block";
+            eyeOffIcon.style.display = isPassword ? "block" : "none";
+        }
+
+        const label = isPassword ? "Hide password" : "Show password";
+        togglePasswordBtn.setAttribute("aria-label", label);
+        togglePasswordBtn.setAttribute("title", label);
+        passwordInput.focus();
     });
 }
 

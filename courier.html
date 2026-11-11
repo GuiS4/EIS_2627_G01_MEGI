@@ -96,7 +96,7 @@
                 <li>
 
                     <a href="#active" data-section="active">
-                        <span aria-hidden="true">↗</span> My deliveries <b id="activeCount">0</b>
+                        <span aria-hidden="true">↗</span> Active deliverables <b id="activeCount">0</b>
                     </a>
 
                 </li>
@@ -200,7 +200,7 @@
 
                     <div class="dashboard-card">
 
-                        <h3>Active deliveries</h3>
+                        <h3>Active deliverables</h3>
 
                         <strong id="statActive">0</strong>
 
@@ -257,8 +257,6 @@
 
                     </div>
 
-                    <span class="region-label">Porto, Portugal</span>
-
                 </div>
 
                 <div class="toolbar">
@@ -273,12 +271,12 @@
 
                 </div>
 
-                <div id="availableList" class="jobs-grid"></div>
+                <div id="availableList" class="history-accordion-list"></div>
 
             </section>
 
-            <!-- ACTIVE DELIVERIES -->
-            <section id="active" class="courier-section">
+            <!-- ACTIVE DELIVERABLES -->
+            <section id="active" class="courier-section" aria-labelledby="activeHeading">
 
                 <div class="section-heading">
 
@@ -288,54 +286,37 @@
                             ON THE MOVE
                         </p>
 
-                        <h2>My active deliveries</h2>
+                        <h2 id="activeHeading">Active deliverables</h2>
 
                         <p class="section-description">
-                            Open a delivery to view its stops and update its status.
-                        </p>
-
-                    </div>
-
-                    <label class="compact-label">
-                        Status<select id="activeFilter"><option value="all">All active</option><option value="accepted">Accepted</option><option value="picked_up">Picked up</option></select>
-                    </label>
-
-                </div>
-
-                <div id="activeList" class="jobs-grid"></div>
-
-            </section>
-
-            <!-- DELIVERY DETAILS -->
-            <section id="details" class="courier-section" aria-labelledby="detailsHeading">
-
-                <div class="section-heading">
-
-                    <div>
-
-                        <p class="tag">
-                            DELIVERY WORKSPACE
-                        </p>
-
-                        <h2 id="detailsHeading">Delivery details</h2>
-
-                        <p class="section-description">
-                            Pickup, drop-off and progress in one place.
+                            Open a delivery to view its stops, track progress and update its status.
                         </p>
 
                     </div>
 
                 </div>
 
-                <div class="detail-layout">
+                <div class="active-deliverables-layout">
 
-                    <article id="deliveryDetails" class="content-card" aria-live="polite"></article>
+                    <div class="active-list-col">
+
+                        <div class="active-toolbar">
+
+                            <label class="compact-label">
+                                Status<select id="activeFilter"><option value="all">All active</option><option value="accepted">Accepted</option><option value="picked_up">Picked up</option></select>
+                            </label>
+
+                        </div>
+
+                        <div id="activeList" class="history-accordion-list active-accordion-list"></div>
+
+                    </div>
 
                     <div class="content-card map-card">
 
                         <div class="map-heading">
 
-                            <h3>Delivery map</h3>
+                            <h3 id="mapTitle">Delivery map</h3>
 
                             <button id="fitMap" class="btn btn-outline">
                                 Fit stops

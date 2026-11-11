@@ -284,6 +284,138 @@
         ].join(' ').toLowerCase().includes(query.trim().toLowerCase());
     }
 
+    function availableAccordionItem(job, isOpen) {
+        const workflow = state.jobs[job.id];
+        const windowStr = job.window.replace('Demo window: ', '');
+
+        return `<details class="history-item" data-id="${job.id}" ${isOpen ? 'open' : ''}>
+            <summary class="history-summary">
+                <div class="history-summary-left">
+                    <span class="history-chevron" aria-hidden="true">▸</span>
+                    <strong class="history-id">${job.id}</strong>
+                    <span class="history-item-tag">${esc(job.item)} · ${job.weight} kg · ${job.volume ?? '—'} m³</span>
+                </div>
+                <div class="history-summary-middle">
+                    <span class="history-route-summary">
+                        <span>${esc(job.pickup.name)}</span>
+                        <span class="history-arrow">→</span>
+                        <span>${esc(job.drop.name)}</span>
+                    </span>
+                </div>
+                <div class="history-summary-right">
+                    <span class="fee">${money(job.fee)}</span>
+                    <span class="history-date">${windowStr}</span>
+                    <span class="order-status status-available">Available</span>
+                </div>
+            </summary>
+            <div class="history-body">
+                <div class="history-stops-grid">
+                    <div class="stop">
+                        <span class="stop-letter">A</span>
+                        <h4>Pick up from</h4>
+                        <p><strong>${esc(job.pickup.name)}</strong></p>
+                        <p>${esc(job.pickup.address)}</p>
+                        <p class="subtle">${esc(job.pickup.contact)}</p>
+                        <p class="subtle">GPS: ${job.pickup.coords.join(', ')}</p>
+                    </div>
+                    <div class="stop drop">
+                        <span class="stop-letter">B</span>
+                        <h4>Deliver to</h4>
+                        <p><strong>${esc(job.drop.name)}</strong></p>
+                        <p>${esc(job.drop.address)}</p>
+                        <p class="subtle">${esc(job.drop.contact)}</p>
+                        <p class="subtle">GPS: ${job.drop.coords.join(', ')}</p>
+                    </div>
+                </div>
+
+                <div class="delivery-note">
+                    <strong>Handling instructions</strong><br>
+                    ${esc(job.note)}<br>
+                    <span class="subtle">${job.window}</span>
+                </div>
+
+                <div class="active-action-container">
+                    <button class="btn btn-primary detail-action" data-advance="${job.id}" data-expected="available">
+                        Accept delivery
+                    </button>
+                </div>
+
+                <div class="history-mini-map-box">
+                    <div id="avmap-${job.id}" class="history-mini-map"
+                         data-plat="${job.pickup.coords[0]}" data-plng="${job.pickup.coords[1]}"
+                         data-dlat="${job.drop.coords[0]}"   data-dlng="${job.drop.coords[1]}">
+                    </div>
+                </div>
+            </div>
+        </details>`;
+    }
+
+    function activeAccordionItem(job, isOpen, isSelected) {
+        const workflow = state.jobs[job.id];
+        const lastEv = workflow.events.at(-1);
+        const eventDateStr = lastEv ? date(lastEv.at) : '';
+
+        return `<details class="history-item ${isSelected ? 'selected' : ''}" name="active-deliverable" data-id="${job.id}" ${isOpen ? 'open' : ''}>
+            <summary class="history-summary">
+                <div class="history-summary-left">
+                    <span class="history-chevron" aria-hidden="true">▸</span>
+                    <strong class="history-id">${job.id}</strong>
+                </div>
+                <div class="history-summary-right">
+                    <span class="fee">${money(job.fee)}</span>
+                    <span class="history-date">${eventDateStr}</span>
+                    <span class="order-status status-${workflow.status}">${labels[workflow.status]}</span>
+                </div>
+            </summary>
+            <div class="history-body">
+                <p class="history-package-meta"><span class="history-item-tag">${esc(job.item)} · ${job.weight} kg · ${job.volume ?? '—'} m³</span></p>
+
+                <div class="history-stops-grid">
+                    <div class="stop">
+                        <span class="stop-letter">A</span>
+                        <h4>Pick up from</h4>
+                        <p><strong>${esc(job.pickup.name)}</strong></p>
+                        <p>${esc(job.pickup.address)}</p>
+                        <p class="subtle">${esc(job.pickup.contact)}</p>
+                        <p class="subtle">GPS: ${job.pickup.coords.join(', ')}</p>
+                    </div>
+                    <div class="stop drop">
+                        <span class="stop-letter">B</span>
+                        <h4>Deliver to</h4>
+                        <p><strong>${esc(job.drop.name)}</strong></p>
+                        <p>${esc(job.drop.address)}</p>
+                        <p class="subtle">${esc(job.drop.contact)}</p>
+                        <p class="subtle">GPS: ${job.drop.coords.join(', ')}</p>
+                    </div>
+                </div>
+
+                <div class="delivery-note">
+                    <strong>Handling instructions</strong><br>
+                    ${esc(job.note)}<br>
+                    <span class="subtle">${job.window}</span>
+                </div>
+
+                <ol class="progress" aria-label="Delivery progress">
+                    ${['accepted', 'picked_up', 'delivered'].map(s => `<li class="${workflow.events.some(e => e.status === s) ? 'done' : ''}">${labels[s]}</li>`).join('')}
+                </ol>
+
+                ${next[workflow.status] ? `
+                <div class="active-action-container">
+                    <button class="btn btn-primary detail-action" data-advance="${job.id}" data-expected="${workflow.status}">
+                        ${actions[workflow.status]}
+                    </button>
+                </div>` : ''}
+
+                <div class="history-timeline-box" style="padding-left: 0; padding-top: 14px; border-top: 1px dashed var(--line); margin-top: 8px;">
+                    <h4>Delivery Timeline</h4>
+                    <div class="timeline" style="margin-top: 6px;">
+                        ${workflow.events.map(e => `<p>${labels[e.status]} · ${date(e.at)}</p>`).join('')}
+                    </div>
+                </div>
+            </div>
+        </details>`;
+    }
+
     function historyAccordionItem(job) {
         const workflow = state.jobs[job.id];
         const deliveredEvent = workflow.events.find(e => e.status === 'delivered') || workflow.events.at(-1);
@@ -341,7 +473,6 @@
                     <div class="proof-card history-pod-box">
                         <h4>Proof of Delivery (POD)</h4>
                         <img src="${workflow.signature}" alt="Recipient signature" class="signature-preview-img">
-                        <p class="subtle">Digital signature verified at delivery</p>
                     </div>` : ''}
                     <div class="history-mini-map-box">
                         <div id="hmap-${job.id}" class="history-mini-map"
@@ -425,33 +556,108 @@
         const found = available.filter(j => match(j, $('jobSearch').value));
         found.sort((a, b) => $('jobSort').value === 'pay' ? b.fee - a.fee : $('jobSort')
             .value === 'weight' ? a.weight - b.weight : a.id.localeCompare(b.id));
-        list('availableList', found, available.length ? 'No matching jobs' :
-            'All jobs have been accepted', available.length ?
-            'Try another ID, address or package.' :
-            'Check your active deliveries below. Reset the demo to explore again.');
-        list('activeList', active.filter(j => $('activeFilter').value === 'all' || state.jobs[j
-                .id].status === $('activeFilter').value),
-            'No active deliveries in this view',
-            'Accept an available job or choose a different status filter.');
-        
+        const openAvailIds = new Set(
+            Array.from($('availableList').querySelectorAll('details[open]')).map(d => d.dataset.id)
+        );
+        $('availableList').innerHTML = found.length ?
+            found.map(j => availableAccordionItem(j, openAvailIds.has(j.id))).join('') :
+            `<div class="empty-state"><strong>${available.length ? 'No matching jobs' : 'All jobs have been accepted'}</strong>${available.length ? 'Try another ID, address or package.' : 'Check your active deliveries below. Reset the demo to explore again.'}</div>`;
+
+        // Active deliverables in accordion style on the left
+        const filteredActive = active.filter(j => $('activeFilter').value === 'all' || state.jobs[j
+                .id].status === $('activeFilter').value);
+
+        if (selected && !active.some(j => j.id === selected)) {
+            selected = null;
+        }
+
+        // Enforce single-open: only the selected active deliverable is open (if any)
+        const openActiveIds = new Set();
+        if (selected && filteredActive.some(j => j.id === selected)) {
+            openActiveIds.add(selected);
+        }
+
+        $('activeList').innerHTML = filteredActive.length ?
+            filteredActive.map(j => activeAccordionItem(j, openActiveIds.has(j.id), j.id === selected)).join('') :
+            `<div class="empty-state"><strong>No active deliverables in this view</strong>Accept an available job or choose a different status filter.</div>`;
+
+        // Update map on the right for selected active delivery
+        const selectedJob = catalog.find(j => j.id === selected);
+        if (selectedJob && active.some(j => j.id === selected)) {
+            if ($('mapTitle')) $('mapTitle').textContent = `Delivery map · ${selectedJob.id}`;
+            renderMap(selectedJob);
+        } else {
+            if ($('mapTitle')) $('mapTitle').textContent = 'Delivery map';
+            $('mapMessage').textContent = 'Select an active deliverable to view its route.';
+            if ($('fitMap')) $('fitMap').disabled = true;
+            if (map && markers) {
+                markers.clearLayers();
+                map.setView([41.1500, -8.6200], 13);
+            }
+        }
+
+        // Attach listeners to active accordions to switch map on the right and maintain single-open
+        $('activeList').querySelectorAll('details.history-item').forEach(details => {
+            details.addEventListener('toggle', function() {
+                if (this.open) {
+                    const id = this.dataset.id;
+                    selected = id;
+                    $('activeList').querySelectorAll('details.history-item').forEach(d => {
+                        if (d !== this && d.open) {
+                            d.open = false;
+                        }
+                        d.classList.toggle('selected', d.dataset.id === id);
+                    });
+                    const job = catalog.find(j => j.id === id);
+                    if (job) {
+                        if ($('mapTitle')) $('mapTitle').textContent = `Delivery map · ${job.id}`;
+                        renderMap(job);
+                    }
+                } else {
+                    this.classList.remove('selected');
+                    const anyOpen = $('activeList').querySelector('details.history-item[open]');
+                    if (!anyOpen) {
+                        selected = null;
+                        if ($('mapTitle')) $('mapTitle').textContent = 'Delivery map';
+                        $('mapMessage').textContent = 'Select an active deliverable to view its route.';
+                        if ($('fitMap')) $('fitMap').disabled = true;
+                        if (map && markers) {
+                            markers.clearLayers();
+                            map.setView([41.1500, -8.6200], 13);
+                        }
+                    }
+                }
+            });
+        });
+
         const filteredHistory = history.filter(j => match(j, $('historySearch').value));
         $('historyList').innerHTML = filteredHistory.length ?
             filteredHistory.map(historyAccordionItem).join('') :
             `<div class="empty-state"><strong>No completed deliveries in this view</strong>Completed jobs appear here. Try clearing your search.</div>`;
 
-        // Attach lazy mini-map initialisation to each history accordion item
-        $('historyList').querySelectorAll('details.history-item').forEach(details => {
-            details.addEventListener('toggle', function handleToggle() {
-                if (!this.open) return;
-                const mapDiv = this.querySelector('.history-mini-map');
-                if (!mapDiv) return;
+        attachAccordionMaps('availableList');
+        attachAccordionMaps('historyList');
+    }
+
+    function attachAccordionMaps(listId) {
+        const el = $(listId);
+        if (!el) return;
+        el.querySelectorAll('details.history-item').forEach(details => {
+            function loadMap() {
+                const mapDiv = details.querySelector('.history-mini-map');
+                if (!mapDiv || mapDiv._miniMapDone) return;
                 const plat = parseFloat(mapDiv.dataset.plat);
                 const plng = parseFloat(mapDiv.dataset.plng);
                 const dlat = parseFloat(mapDiv.dataset.dlat);
                 const dlng = parseFloat(mapDiv.dataset.dlng);
-                // Small delay lets the browser finish the details reveal layout
                 setTimeout(() => initHistoryMiniMap(mapDiv, [plat, plng], [dlat, dlng]), 50);
+            }
+            details.addEventListener('toggle', function() {
+                if (this.open) loadMap();
             });
+            if (details.open) {
+                loadMap();
+            }
         });
     }
 
@@ -460,12 +666,7 @@
     }
 
     function renderDetails() {
-        const job = catalog.find(j => j.id === selected),
-            workflow = state.jobs[selected];
-        const hasSig = workflow.signature && workflow.signature.startsWith('data:image/png');
-        $('deliveryDetails').innerHTML =
-            `<div class="detail-top"><h3>${job.id}</h3>${badge(workflow.status)}</div><p class="package">${job.item} · ${job.weight} kg · ${job.volume ?? '—'} m³ · <strong>${money(job.fee)} delivery fee</strong><br>${job.window}</p>${stop(job.pickup,'pickup')}${stop(job.drop,'drop')}<div class="delivery-note"><strong>Handling instructions</strong><br>${esc(job.note)}<br><span>Names and pickup windows are illustrative.</span></div><ol class="progress" aria-label="Delivery progress">${['accepted','picked_up','delivered'].map(s=>`<li class="${workflow.events.some(e=>e.status === s) ? 'done' : ''}">${labels[s]}</li>`).join('')}</ol>${next[workflow.status] ? `<button class="btn btn-primary detail-action" data-advance="${job.id}" data-expected="${workflow.status}">${actions[workflow.status]}</button>` : '<p class="order-status status-delivered">Delivery completed · saved to history</p>'}${hasSig ? `<div class="proof-card"><h4>Proof of Delivery (POD)</h4><img src="${workflow.signature}" alt="Customer signature" class="signature-preview-img"><p class="subtle">Digital signature verified at delivery</p></div>` : ''}<div class="timeline">${workflow.events.map(e=>`<p>${labels[e.status]} · ${date(e.at)}</p>`).join('')}</div>`;
-        renderMap(job);
+        // Merged with active deliverables
     }
 
     async function renderMap(job) {
@@ -491,6 +692,7 @@
             });
             markers = L.layerGroup().addTo(map);
         }
+        if ($('fitMap')) $('fitMap').disabled = false;
         markers.clearLayers();
         [job.pickup, job.drop].forEach((point, i) => {
             const popup = document.createElement('span');
@@ -722,23 +924,17 @@
         render();
         toast(
             `${id}: ${labels[workflow.status]}.${workflow.status === 'delivered' ? ' Added to delivery history with POD signature.' : ''}`);
-        const target = $('deliveryDetails').querySelector('button') || $('deliveryDetails');
-        if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
-        target.focus({
-            preventScroll: true
-        });
+        const activeItem = $('activeList')?.querySelector(`details[data-id="${id}"]`);
+        if (activeItem) {
+            const btn = activeItem.querySelector('button[data-advance]');
+            if (btn) btn.focus({ preventScroll: true });
+        }
     }
     document.addEventListener('click', async event => {
         const view = event.target.closest('[data-view]');
         if (view) {
             selected = view.dataset.view;
             render();
-            location.hash = 'details';
-            $('deliveryDetails').setAttribute('tabindex', '-1');
-            $('deliveryDetails').focus({
-                preventScroll: true
-            });
-            $('details').scrollIntoView();
             return;
         }
         const action = event.target.closest('[data-advance]');
@@ -775,7 +971,11 @@
         toast('Demo data has been reset.');
     });
     ['jobSearch', 'historySearch'].forEach(id => $(id).addEventListener('input', renderLists));
-    ['jobSort', 'activeFilter'].forEach(id => $(id).addEventListener('change', renderLists));
+    $('jobSort').addEventListener('change', renderLists);
+    $('activeFilter').addEventListener('change', () => {
+        selected = null;
+        renderLists();
+    });
     $('fitMap').addEventListener('click', () => {
         if (map && bounds) map.fitBounds(bounds, {
             padding: [45, 45],

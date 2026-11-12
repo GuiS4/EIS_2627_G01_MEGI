@@ -295,25 +295,15 @@
     }
 
     function getActiveCourier() {
-        const selectEl = $('activeCourierSelect');
         try {
-            const currentUser = JSON.parse(localStorage.getItem('cms_current_user'));
+            const currentUser = JSON.parse(sessionStorage.getItem('cms_current_user') || localStorage.getItem('cms_current_user') || 'null');
             if (currentUser && currentUser.role === 'courier' && currentUser.id) {
                 const name = currentUser.fullName || currentUser.name || currentUser.email || 'Courier';
                 COURIER_DIRECTORY[currentUser.id] = name;
-                if (selectEl && !Array.from(selectEl.options).some(o => o.value === String(currentUser.id))) {
-                    const opt = document.createElement('option');
-                    opt.value = String(currentUser.id);
-                    opt.textContent = `${name} (${currentUser.id})`;
-                    selectEl.prepend(opt);
-                }
+                return { id: currentUser.id, name };
             }
         } catch (_) {}
 
-        if (selectEl && selectEl.value) {
-            const id = selectEl.value;
-            return { id, name: COURIER_DIRECTORY[id] || `Courier ${id}` };
-        }
         return { id: 'CR-001', name: 'Alex Silva' };
     }
 
@@ -447,10 +437,12 @@
         style: 'currency',
         currency: 'EUR'
     }).format(value);
-    const date = value => new Intl.DateTimeFormat('en-GB', {
-        dateStyle: 'medium',
-        timeStyle: 'short'
-    }).format(new Date(value));
+    const date = value => {
+        const dt = new Date(value);
+        if (!Number.isFinite(dt.getTime())) return String(value ?? '');
+        const pad = n => String(n).padStart(2, '0');
+        return `${pad(dt.getDate())}/${pad(dt.getMonth() + 1)}/${dt.getFullYear()}, ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+    };
     const esc = value => String(value).replace(/[&<>"']/g, ch => ({
         '&': '&amp;',
         '<': '&lt;',
@@ -1422,14 +1414,6 @@
             advance(id, expected);
         }
     });
-    if ($('activeCourierSelect')) {
-        getActiveCourier();
-        $('activeCourierSelect').addEventListener('change', () => {
-            const courier = getActiveCourier();
-            renderLists();
-            toast(`Acting as courier: ${courier.name} (${courier.id}).`);
-        });
-    }
     $('resetDemo').addEventListener('click', async () => {
         if (!(await confirmAction('Reset demo data?',
                 'This replaces only CourierFlow courier demo progress in this browser with the original sample deliveries.',

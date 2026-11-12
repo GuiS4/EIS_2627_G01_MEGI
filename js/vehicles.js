@@ -218,6 +218,19 @@ function isExpired(dateString) {
     return !dateString || dateString < todayISO();
 }
 
+function formatDateDDMMYYYY(value) {
+    if (!value) return "—";
+    const str = String(value).trim();
+    const isoMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(str);
+    if (isoMatch) {
+        return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
+    }
+    const dt = new Date(str);
+    if (!Number.isFinite(dt.getTime())) return str;
+    const pad = n => String(n).padStart(2, "0");
+    return `${pad(dt.getDate())}/${pad(dt.getMonth() + 1)}/${dt.getFullYear()}`;
+}
+
 // =====================================
 // MESSAGE
 // =====================================
@@ -371,6 +384,17 @@ vehicleForm.addEventListener("submit", function(event) {
 
     try {
         saveVehicles(vehicles);
+        const notifs = JSON.parse(localStorage.getItem("cms_staff_notifications") || "[]");
+        notifs.unshift({
+            id: `NOTIF-${Date.now()}`,
+            type: isExpired(insuranceExpiry) || isExpired(inspectionExpiry) ? "expired" : "updated",
+            title: `New Vehicle & Certificates Submitted · ${model} (${plate})`,
+            message: `${currentIdentity.name} submitted ${model} (${plate}) with insurance (${insuranceFile.name}, exp. ${formatDateDDMMYYYY(insuranceExpiry)}) and inspection (${inspectionFile.name}, exp. ${formatDateDDMMYYYY(inspectionExpiry)}).`,
+            vehicleId: vehicle.id,
+            createdAt: new Date().toISOString(),
+            read: false
+        });
+        localStorage.setItem("cms_staff_notifications", JSON.stringify(notifs));
     } catch {
         showVehicleMessage(
             "Unable to save vehicle in browser storage.",
@@ -390,83 +414,121 @@ vehicleForm.addEventListener("submit", function(event) {
 });
 
 // =====================================
-// VEHICLE LIST
+// VEHICLE LIST (ACCORDION)
 // =====================================
 
 function renderVehicles() {
 
     const vehicles = getVehicles();
 
-    // Statistics
-
-    document.getElementById("totalVehicles").textContent =
-        vehicles.length;
-
-    document.getElementById("approvedVehicles").textContent =
-        vehicles.filter(v =>
-            v.approval_status === "Approved" &&
-            !isExpired(v.insurance_expiry_date) &&
-            !isExpired(v.inspection_expiry_date)
-        ).length;
-
-    document.getElementById("pendingVehicles").textContent =
-        vehicles.filter(v =>
-            v.approval_status === "Pending"
-        ).length;
-
     vehiclesList.replaceChildren();
 
     if (vehicles.length === 0) {
         const empty = document.createElement("p");
-        empty.textContent =
-            "No vehicles registered yet.";
+        empty.className = "empty-state";
+        empty.textContent = "No vehicles registered yet.";
         vehiclesList.appendChild(empty);
         return;
     }
 
     vehicles.forEach(function(vehicle) {
 
-        const card = document.createElement("article");
-        card.className = "registered-vehicle";
+        const details = document.createElement("details");
+        details.className = "vehicle-accordion-item";
+        details.name = "vehicle-accordion";
 
-        // Header
+        // Enforce only one open item at a time across all browsers
+        details.addEventListener("toggle", function() {
+            if (this.open) {
+                vehiclesList.querySelectorAll("details.vehicle-accordion-item").forEach(function(other) {
+                    if (other !== details && other.open) {
+                        other.open = false;
+                    }
+                });
+            }
+        });
 
-        const header = document.createElement("div");
-        header.className = "vehicle-card-header";
+        // Summary row
+        const summary = document.createElement("summary");
+        summary.className = "vehicle-accordion-summary";
 
-        const info = document.createElement("div");
+        // Summary Left
+        const summaryLeft = document.createElement("div");
+        summaryLeft.className = "vehicle-summary-left";
+
+        const chevron = document.createElement("span");
+        chevron.className = "vehicle-chevron";
+        chevron.setAttribute("aria-hidden", "true");
+        chevron.textContent = "▸";
+
+        const summaryText = document.createElement("div");
+        summaryText.className = "vehicle-summary-text";
+
+        const titleRow = document.createElement("div");
+        titleRow.className = "vehicle-title-row";
 
         const title = document.createElement("h3");
+        title.className = "vehicle-summary-title";
         title.textContent = vehicle.model;
 
-        const plate = document.createElement("p");
-        plate.className = "vehicle-plate";
+        const plate = document.createElement("span");
+        plate.className = "vehicle-summary-plate";
+        plate.textContent = vehicle.license_plate;
 
-        plate.textContent =
-            vehicle.license_plate + " · " + vehicle.type_name;
+        const typeBadge = document.createElement("span");
+        typeBadge.className = "vehicle-summary-type";
+        typeBadge.textContent = vehicle.type_name;
 
-        info.append(title, plate);
+        titleRow.append(title, plate, typeBadge);
+
+        const sub = document.createElement("p");
+        sub.className = "vehicle-summary-sub";
+
+        const submitterLabel = document.createElement("span");
+        submitterLabel.textContent = "Submitted by ";
+        const submitterName = document.createElement("strong");
+        submitterName.textContent = resolveSubmitterName(vehicle);
+
+        const dot = document.createElement("span");
+        dot.textContent = " · ";
+
+        const capacitySpan = document.createElement("span");
+        capacitySpan.textContent = `${vehicle.max_weight_kg} kg · ${vehicle.max_vol_m3} m³`;
+
+        sub.append(submitterLabel, submitterName, dot, capacitySpan);
+
+        summaryText.append(titleRow, sub);
+        summaryLeft.append(chevron, summaryText);
+
+        // Summary Right (Approval Status badge)
+        const summaryRight = document.createElement("div");
+        summaryRight.className = "vehicle-summary-right";
 
         const status = document.createElement("span");
         status.className =
             "vehicle-status " +
-            vehicle.approval_status.toLowerCase();
-
+            (vehicle.approval_status || "pending").toLowerCase();
         status.textContent = vehicle.approval_status;
 
-        header.append(info, status);
+        summaryRight.appendChild(status);
+        summary.append(summaryLeft, summaryRight);
 
-        // Details
+        // Accordion Body
+        const body = document.createElement("div");
+        body.className = "vehicle-accordion-body";
 
-        const details = document.createElement("div");
-        details.className = "vehicle-info";
+        // Detailed fields grid
+        const infoGrid = document.createElement("div");
+        infoGrid.className = "vehicle-info";
 
         const fields = [
             ["Submitted By", resolveSubmitterName(vehicle)],
+            ["Vehicle Type", vehicle.type_name],
+            ["License Plate", vehicle.license_plate],
             ["Max Weight", vehicle.max_weight_kg + " kg"],
             ["Max Volume", vehicle.max_vol_m3 + " m³"],
-            ["Insurance Expiry", vehicle.insurance_expiry_date],
-            ["Inspection Expiry", vehicle.inspection_expiry_date],
+            ["Insurance Expiry", formatDateDDMMYYYY(vehicle.insurance_expiry_date)],
+            ["Inspection Expiry", formatDateDDMMYYYY(vehicle.inspection_expiry_date)],
             ["Insurance File", vehicle.insurance_expiry_doc],
             ["Inspection File", vehicle.inspection_expiry_doc]
         ];
@@ -476,7 +538,6 @@ function renderVehicles() {
         }
 
         fields.forEach(function(field) {
-
             const wrapper = document.createElement("div");
 
             const label = document.createElement("span");
@@ -486,32 +547,32 @@ function renderVehicles() {
             value.textContent = field[1];
 
             wrapper.append(label, value);
-            details.appendChild(wrapper);
+            infoGrid.appendChild(wrapper);
         });
 
         // Document validity
-
         const expired =
             isExpired(vehicle.insurance_expiry_date) ||
             isExpired(vehicle.inspection_expiry_date);
 
         const warning = document.createElement("p");
-
         warning.className =
             expired ? "document-warning" : "document-valid";
-
         warning.textContent = expired
             ? "Document expired: vehicle unavailable for allocation."
             : "Documents are within their validity dates.";
 
-        // Delete action - for the prototype
+        // Delete action - for prototype
+        const actionsRow = document.createElement("div");
+        actionsRow.className = "vehicle-accordion-actions";
 
         const deleteButton = document.createElement("button");
         deleteButton.type = "button";
         deleteButton.className = "vehicle-delete";
         deleteButton.textContent = "Delete Vehicle";
 
-        deleteButton.addEventListener("click", function() {
+        deleteButton.addEventListener("click", function(event) {
+            event.stopPropagation();
 
             if (!confirm("Delete this vehicle?")) {
                 return;
@@ -532,14 +593,56 @@ function renderVehicles() {
             }
         });
 
-        card.append(
-            header,
-            details,
-            warning,
-            deleteButton
-        );
+        actionsRow.appendChild(deleteButton);
 
-        vehiclesList.appendChild(card);
+        body.append(infoGrid, warning, actionsRow);
+
+        details.append(summary, body);
+        vehiclesList.appendChild(details);
+    });
+}
+
+// =====================================
+// SIDEBAR COUNTS & DEMO RESET SYNC
+// =====================================
+
+const COURIER_DEMO_KEY = "courierflow.courier.demo.v1";
+
+function syncCourierSidebarCounts() {
+    const availEl = document.getElementById("availableCount");
+    const activeEl = document.getElementById("activeCount");
+    if (!availEl && !activeEl) return;
+
+    let availCount = 3;
+    let activeCount = 2;
+
+    try {
+        const raw = localStorage.getItem(COURIER_DEMO_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.jobs && typeof parsed.jobs === "object") {
+                const statuses = Object.values(parsed.jobs).map(j => j && j.status);
+                availCount = statuses.filter(s => s === "available").length;
+                activeCount = statuses.filter(s => s === "accepted" || s === "picked_up").length;
+            }
+        }
+    } catch {
+        // Fallback to default seed counts
+    }
+
+    if (availEl) availEl.textContent = String(availCount);
+    if (activeEl) activeEl.textContent = String(activeCount);
+}
+
+const resetDemoBtn = document.getElementById("resetDemo");
+if (resetDemoBtn) {
+    resetDemoBtn.addEventListener("click", function() {
+        if (!confirm("Reset demo data?\nThis replaces only CourierFlow courier demo progress in this browser with the original sample deliveries.")) {
+            return;
+        }
+        localStorage.removeItem(COURIER_DEMO_KEY);
+        localStorage.removeItem("cms_route_assignments");
+        syncCourierSidebarCounts();
     });
 }
 
@@ -547,11 +650,15 @@ function renderVehicles() {
 // INITIALIZATION
 // =====================================
 
+syncCourierSidebarCounts();
 renderVehicles();
 
-// Refresh if another tab updates the vehicles
+// Refresh if another tab updates the vehicles or courier demo state
 window.addEventListener("storage", function(event) {
     if (event.key === VEHICLE_KEY) {
         renderVehicles();
+    }
+    if (event.key === COURIER_DEMO_KEY || event.key === null) {
+        syncCourierSidebarCounts();
     }
 });

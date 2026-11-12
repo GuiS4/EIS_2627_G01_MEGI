@@ -113,7 +113,8 @@ if (registerForm) {
 
         if (role !== "" &&
             role !== "client" &&
-            role !== "courier") {
+            role !== "courier" &&
+            role !== "staff") {
 
             showError(
                 "role",
@@ -151,14 +152,24 @@ if (registerForm) {
         // Passwords are stored locally in plain text.
         // Never use this approach in production.
 
+        const approvalStatus = (role === "courier" || role === "staff")
+            ? "Pending"
+            : "Approved";
+
         const newUser = {
-            id: crypto.randomUUID(),
+            id: role === "courier"
+                ? `CR-${crypto.randomUUID().slice(0, 6).toUpperCase()}`
+                : role === "staff"
+                    ? `ST-${crypto.randomUUID().slice(0, 6).toUpperCase()}`
+                    : crypto.randomUUID(),
             name: name,
             username: username,
             email: email,
             phone: phone,
             nif: nif,
             role: role,
+            approval_status: approvalStatus,
+            approved_by: null,
             password: password,
             createdAt: new Date().toISOString()
         };
@@ -170,7 +181,13 @@ if (registerForm) {
             JSON.stringify(users)
         );
 
-        alert("Account created successfully! Please login.");
+        if (role === "courier") {
+            alert("Courier account created! Your account is pending Staff approval before login.");
+        } else if (role === "staff") {
+            alert("Staff account created! Your account is pending Admin approval before login.");
+        } else {
+            alert("Account created successfully! Please login.");
+        }
 
         window.location.href = "login.html";
     });
@@ -230,7 +247,32 @@ if (loginForm) {
             return;
         }
 
-        // Clear any previous administrator demo session
+        // Staff demo access
+        if (email === "staff@staff.demo" && password === "Staff123!") {
+            sessionStorage.removeItem("cms_current_user");
+            sessionStorage.setItem("courierflow.demo.role", "staff");
+            window.location.href = "staff.html";
+            return;
+        }
+
+        // Courier demo access
+        if (email === "courier@courier.demo" && password === "Courier123!") {
+            sessionStorage.setItem("courierflow.demo.role", "courier");
+            sessionStorage.setItem(
+                "cms_current_user",
+                JSON.stringify({
+                    id: "CR-001",
+                    name: "Alex Silva",
+                    username: "alexsilva",
+                    email: "courier@courier.demo",
+                    role: "courier"
+                })
+            );
+            window.location.href = "courier.html";
+            return;
+        }
+
+        // Clear any previous demo role session
         sessionStorage.removeItem("courierflow.demo.role");
 
         const users = getUsers();
@@ -249,6 +291,61 @@ if (loginForm) {
             return;
         }
 
+        // Check approval status for Staff and Courier accounts
+        if (user.role === "staff") {
+            // Check latest status in Admin staff store if available
+            try {
+                const adminStore = JSON.parse(localStorage.getItem("courierflow.admin.staff.v1") || "null");
+                const matchStaff = adminStore?.staff?.find(s => s.id === user.id || (s.email && s.email.toLowerCase() === email));
+                if (matchStaff && matchStaff.approval_status) {
+                    user.approval_status = matchStaff.approval_status;
+                }
+            } catch { /* ignore */ }
+
+            if (user.approval_status === "Pending") {
+                showError(
+                    "password",
+                    "passwordError",
+                    "Your Staff account is pending Admin approval."
+                );
+                return;
+            }
+            if (user.approval_status === "Rejected") {
+                showError(
+                    "password",
+                    "passwordError",
+                    "Your Staff account registration was rejected by Admin."
+                );
+                return;
+            }
+        } else if (user.role === "courier") {
+            // Check latest status in Staff courier store if available
+            try {
+                const staffStore = JSON.parse(localStorage.getItem("courierflow.staff.demo.v1") || "null");
+                const matchCourier = staffStore?.couriers?.find(c => c.id === user.id || (c.email && c.email.toLowerCase() === email));
+                if (matchCourier && matchCourier.approval_status) {
+                    user.approval_status = matchCourier.approval_status;
+                }
+            } catch { /* ignore */ }
+
+            if (user.approval_status === "Pending") {
+                showError(
+                    "password",
+                    "passwordError",
+                    "Your Courier account is pending Staff approval."
+                );
+                return;
+            }
+            if (user.approval_status === "Rejected") {
+                showError(
+                    "password",
+                    "passwordError",
+                    "Your Courier account registration was rejected by Staff."
+                );
+                return;
+            }
+        }
+
         // Demo session (not secure authentication)
 
         sessionStorage.setItem(
@@ -256,6 +353,8 @@ if (loginForm) {
             JSON.stringify({
                 id: user.id,
                 name: user.name,
+                username: user.username,
+                email: user.email,
                 role: user.role
             })
         );
@@ -268,6 +367,13 @@ if (loginForm) {
         } else if (user.role === "courier") {
             window.location.href = "courier.html";
 
+        } else if (user.role === "staff") {
+            sessionStorage.setItem("courierflow.demo.role", "staff");
+            window.location.href = "staff.html";
+
+        } else if (user.role === "admin") {
+            sessionStorage.setItem("courierflow.demo.role", "admin");
+            window.location.href = "admin.html";
         }
     });
 }

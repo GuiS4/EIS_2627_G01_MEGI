@@ -7,14 +7,22 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Vehicles - CourierFlow</title>
+    <title>Vehicles — CourierFlow</title>
 
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/register.css">
+    <link rel="stylesheet" href="css/client.css">
+    <link rel="stylesheet" href="css/courier.css">
     <link rel="stylesheet" href="css/vehicles.css">
 
 </head>
 
 <body>
+
+    <a class="skip-link" href="#main">
+        Skip to content
+    </a>
 
     <!-- HEADER -->
     <header class="top-header">
@@ -24,8 +32,8 @@
         </a>
 
         <div class="header-actions">
-            <a href="courier.html" class="btn btn-outline">
-                Courier Dashboard
+            <a href="index.html" class="btn btn-outline">
+                Home
             </a>
 
             <a href="login.html" class="btn btn-primary">
@@ -35,49 +43,68 @@
 
     </header>
 
-    <!-- SIDEBAR -->
+    <!-- COURIER SIDEBAR -->
     <aside class="sidebar">
 
-        <nav>
+        <p class="nav-label">
+            COURIER WORKSPACE
+        </p>
+
+        <nav aria-label="Main navigation">
             <ul class="sidebar-links">
 
                 <li>
-                    <a href="courier.html">
-                        Dashboard
+                    <a href="courier.html#dashboard">
+                        <span aria-hidden="true">▦</span> Dashboard
                     </a>
                 </li>
 
                 <li>
                     <a href="courier.html#available">
-                        Available Jobs
+                        <span aria-hidden="true">＋</span> Available jobs <b id="availableCount">0</b>
                     </a>
                 </li>
 
                 <li>
                     <a href="courier.html#active">
-                        My Deliveries
+                        <span aria-hidden="true">↗</span> Active deliverables <b id="activeCount">0</b>
                     </a>
                 </li>
 
                 <li>
-                    <a href="vehicles.html" class="active">
-                        My Vehicles
+                    <a href="vehicles.html" class="active" aria-current="location">
+                        <span aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="14" height="12" rx="1"></rect><polygon points="15 8 19.5 8 23 11.5 23 16 15 16 15 8"></polygon><circle cx="5.5" cy="18.5" r="2.2"></circle><circle cx="18.5" cy="18.5" r="2.2"></circle></svg></span>
+                        Vehicles
                     </a>
                 </li>
 
                 <li>
                     <a href="courier.html#history">
-                        Delivery History
+                        <span aria-hidden="true">◷</span> Delivery history
                     </a>
                 </li>
 
             </ul>
         </nav>
 
+        <div class="sidebar-note">
+
+            <strong>Your local workspace</strong>
+
+            <p>
+                Sample deliveries in Porto.<br>No real orders are dispatched.
+            </p>
+
+            <button class="text-button" id="resetDemo">
+                Reset demo data
+            </button>
+
+        </div>
+
     </aside>
 
     <!-- MAIN -->
-    <main class="vehicles-main">
+    <main id="main" class="vehicles-main" tabindex="-1">
 
         <div class="container">
 
@@ -86,32 +113,12 @@
 
                 <p class="tag">COURIER AREA</p>
 
-                <h1>Vehicle Management</h1>
+                <h1>Vehicles</h1>
 
                 <p>
-                    Register and manage your vehicles,
+                    Register and manage vehicles,
                     capacities and required documents.
                 </p>
-
-            </section>
-
-            <!-- STATISTICS -->
-            <section class="vehicle-stats">
-
-                <div class="vehicle-stat-card">
-                    <h3>Total Vehicles</h3>
-                    <strong id="totalVehicles">0</strong>
-                </div>
-
-                <div class="vehicle-stat-card">
-                    <h3>Approved Vehicles</h3>
-                    <strong id="approvedVehicles">0</strong>
-                </div>
-
-                <div class="vehicle-stat-card">
-                    <h3>Pending Approval</h3>
-                    <strong id="pendingVehicles">0</strong>
-                </div>
 
             </section>
 
@@ -297,11 +304,10 @@
             <!-- REGISTERED VEHICLES -->
             <section class="vehicle-section">
 
-                <h2>My Registered Vehicles</h2>
+                <h2>All Vehicles</h2>
 
                 <p class="section-description">
-                    Review the approval status and
-                    document validity of your vehicles.
+                    Review all registered vehicles in the shared pool, approval status and document validity.
                 </p>
 
                 <div id="vehiclesList"

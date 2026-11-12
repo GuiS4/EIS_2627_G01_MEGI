@@ -448,10 +448,15 @@ function renderOrderCard(order) {
     destinationText.textContent =
         "Destination: " + order.destination.join(", ");
 
+    const createdDt = new Date(order.createdAt);
+    const pad2 = n => String(n).padStart(2, "0");
+    const formattedCreated = Number.isFinite(createdDt.getTime())
+        ? `${pad2(createdDt.getDate())}/${pad2(createdDt.getMonth() + 1)}/${createdDt.getFullYear()}, ${pad2(createdDt.getHours())}:${pad2(createdDt.getMinutes())}`
+        : String(order.createdAt || "");
+
     const dateText = document.createElement("p");
     dateText.textContent =
-        "Created: " +
-        new Date(order.createdAt).toLocaleString();
+        "Created: " + formattedCreated;
 
     const status = document.createElement("span");
     status.className = "order-status";

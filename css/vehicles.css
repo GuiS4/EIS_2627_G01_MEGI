@@ -156,61 +156,192 @@
     color: #15803d;
 }
 
-/* VEHICLE LIST */
+/* VEHICLE LIST (ACCORDION) */
 
 .vehicles-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.registered-vehicle {
-    background: white;
-    padding: 25px;
+.vehicle-accordion-item {
+    background: #ffffff;
     border: 1px solid #e7eaf0;
     border-radius: 12px;
-    min-width: 0;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.vehicle-card-header {
+.vehicle-accordion-item:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.vehicle-accordion-item[open] {
+    border-color: #94a3b8;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+}
+
+.vehicle-accordion-summary {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 15px;
-    margin-bottom: 20px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    gap: 16px;
+    background: #ffffff;
+    transition: background-color 0.15s ease;
 }
 
-.vehicle-card-header h3 {
-    font-size: 1.15rem;
-    margin-bottom: 5px;
+.vehicle-accordion-summary::-webkit-details-marker {
+    display: none;
 }
 
-.vehicle-plate {
+.vehicle-accordion-summary:hover {
+    background-color: #f8fafc;
+}
+
+.vehicle-accordion-item[open] .vehicle-accordion-summary {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e7eaf0;
+}
+
+.vehicle-summary-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    flex: 1;
+}
+
+.vehicle-chevron {
+    font-size: 15px;
     color: #64748b;
-    font-size: 0.9rem;
+    transition: transform 0.2s ease;
+    display: inline-block;
+    flex-shrink: 0;
+    line-height: 1;
 }
 
-.vehicle-info {
+.vehicle-accordion-item[open] .vehicle-chevron {
+    transform: rotate(90deg);
+    color: #0284c7;
+}
+
+.vehicle-summary-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vehicle-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.vehicle-summary-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.vehicle-summary-plate {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #0f172a;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-left: 3px solid #2563eb;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.vehicle-summary-type {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    background: #edf2f7;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.vehicle-summary-sub {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.vehicle-summary-sub strong {
+    color: #334155;
+    font-weight: 600;
+}
+
+.vehicle-summary-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.vehicle-accordion-body {
+    padding: 22px 24px;
+    background: #ffffff;
+}
+
+.vehicle-accordion-body .vehicle-info {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
     margin-bottom: 20px;
+    background: #f8fafc;
+    border: 1px solid #e7eaf0;
+    border-radius: 10px;
+    padding: 16px 20px;
 }
 
-.vehicle-info div {
+.vehicle-accordion-body .vehicle-info div {
     min-width: 0;
     overflow-wrap: anywhere;
 }
 
-.vehicle-info span {
+.vehicle-accordion-body .vehicle-info span {
     display: block;
     color: #64748b;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
     margin-bottom: 4px;
 }
 
-.vehicle-info strong {
+.vehicle-accordion-body .vehicle-info strong {
     font-size: 0.95rem;
+    color: #0f172a;
+    word-break: break-word;
+}
+
+.vehicle-accordion-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.empty-state {
+    color: #64748b;
+    font-size: 0.95rem;
+    padding: 20px 0;
 }
 
 /* STATUS */
@@ -242,12 +373,20 @@
     color: #dc2626;
     font-size: 0.85rem;
     margin-bottom: 15px;
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    padding: 10px 14px;
+    border-radius: 8px;
 }
 
 .document-valid {
     color: #15803d;
     font-size: 0.85rem;
     margin-bottom: 15px;
+    background: #f0fdf4;
+    border: 1px solid #dcfce7;
+    padding: 10px 14px;
+    border-radius: 8px;
 }
 
 .vehicle-delete {
@@ -257,6 +396,8 @@
     border: 1px solid #fecaca;
     border-radius: 8px;
     cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.15s ease;
 }
 
 .vehicle-delete:hover {
@@ -266,8 +407,21 @@
 /* RESPONSIVE */
 
 @media (max-width: 1000px) {
-    .vehicle-stats,
-    .vehicles-list {
+    .vehicle-accordion-body .vehicle-info {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+    .vehicle-accordion-summary {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .vehicle-summary-right {
+        align-self: flex-start;
+    }
+    .vehicle-accordion-body .vehicle-info {
         grid-template-columns: 1fr;
     }
 }
@@ -275,11 +429,7 @@
 @media (max-width: 800px) {
     .vehicles-main {
         margin-left: 0;
-        padding-top: 110px;
-    }
-
-    .sidebar {
-        display: none;
+        padding-top: 24px;
     }
 
     .vehicle-form-row {
@@ -289,19 +439,5 @@
 
     .vehicle-card {
         padding: 20px;
-    }
-
-    .vehicle-card-header {
-        flex-wrap: wrap;
-    }
-
-    .header-actions {
-        right: 12px;
-        gap: 6px;
-    }
-
-    .header-actions .btn {
-        padding: 7px 9px;
-        font-size: 0.8rem;
     }
 }

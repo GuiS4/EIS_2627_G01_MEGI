@@ -200,6 +200,10 @@ button:disabled {
 }
 
 .sidebar-links a>span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
     width: 18px;
     font-size: 19px;
     text-align: center
@@ -1489,23 +1493,6 @@ footer span {
 /* =========================================================================
    ROUTE VEHICLE SELECTOR & CAPACITY VALIDATION
 ========================================================================= */
-
-.demo-courier-switcher {
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--ink);
-    font-weight: 600;
-}
-
-.demo-courier-switcher select {
-    min-height: 32px;
-    padding: 4px 34px 4px 10px;
-    font-size: 12px;
-    border-radius: 6px;
-}
 
 .route-vehicle-pill {
     font-size: 11px;

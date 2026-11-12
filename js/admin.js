@@ -1,199 +1,173 @@
-/* CourierFlow local admin demo. No authentication or dispatch API.
-   Contacts are fictional. This store is independent of the courier demo. */
+/* CourierFlow Admin Panel — System governance, Staff approvals, personal information, and operational analytics. */
 (() => {
     'use strict';
-    if (sessionStorage.getItem('courierflow.demo.role') !== 'admin') {
+
+    const currentUser = (() => {
+        try {
+            return JSON.parse(sessionStorage.getItem('cms_current_user') || 'null');
+        } catch {
+            return null;
+        }
+    })();
+    const demoRole = sessionStorage.getItem('courierflow.demo.role');
+
+    if (demoRole !== 'admin' && (!currentUser || currentUser.role !== 'admin')) {
         window.location.replace('login.html');
         return;
     }
-    const KEY = 'courierflow.admin.demo.v1';
+
+    const STAFF_KEY = 'courierflow.admin.staff.v1';
+    const PROFILE_KEY = 'courierflow.admin.profile.v1';
     const $ = id => document.getElementById(id);
-    const esc = value => String(value).replace(/[&<>"']/g, ch => ({
+
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
         '&': '&amp;',
         '<': '&lt;',
         '>': '&gt;',
         '"': '&quot;',
         "'": '&#39;'
-    } [ch]));
-    const statuses = {
-        available: 'Available',
-        busy: 'On delivery',
-        offline: 'Unavailable',
-        unassigned: 'Unassigned',
-        accepted: 'Accepted',
-        picked_up: 'Picked up',
-        delivered: 'Delivered'
-    };
-    const badge = status => `<span class="badge badge-${status}">${statuses[status]}</span>`;
-    const activeParcels = id => state.parcels.filter(p => p.courierId === id && p.status !== 'delivered');
-    const courierName = id => state.couriers.find(c => c.id === id)?.name || 'Unassigned';
-    const vehicleFor = id => state.vehicles.find(v => v.courierId === id);
-    const seed = () => ({
-        version: 1,
-        couriers: [{
-            id: 'CR-001',
-            name: 'Alex Silva',
-            phone: '+351 000 000 101',
-            email: 'alex.silva@example.com',
-            status: 'busy'
-        }, {
-            id: 'CR-002',
-            name: 'Maria Costa',
-            phone: '+351 000 000 102',
-            email: 'maria.costa@example.com',
-            status: 'busy'
-        }, {
-            id: 'CR-003',
-            name: 'Daniel Santos',
-            phone: '+351 000 000 103',
-            email: 'daniel.santos@example.com',
-            status: 'available'
-        }, {
-            id: 'CR-004',
-            name: 'Sofia Pereira',
-            phone: '+351 000 000 104',
-            email: 'sofia.pereira@example.com',
-            status: 'offline'
-        }],
-        vehicles: [{
-            id: 'V-001',
-            model: 'Renault Kangoo',
-            plate: 'AA-12-CF',
-            type: 'Van · 650 kg',
-            courierId: 'CR-001'
-        }, {
-            id: 'V-002',
-            model: 'Peugeot Partner',
-            plate: 'AB-34-CF',
-            type: 'Van · 750 kg',
-            courierId: 'CR-002'
-        }, {
-            id: 'V-003',
-            model: 'Citroën Berlingo',
-            plate: 'AC-56-CF',
-            type: 'Van · 650 kg',
-            courierId: null
-        }, {
-            id: 'V-004',
-            model: 'Toyota Proace City',
-            plate: 'AD-78-CF',
-            type: 'Van · 700 kg',
-            courierId: null
-        }],
-        parcels: [{
-            id: 'CF-1041',
-            item: 'Documents',
-            pickup: 'Praça da Liberdade, Porto',
-            drop: 'Praça da Ribeira, Porto',
-            status: 'unassigned',
-            courierId: null
-        }, {
-            id: 'CF-1042',
-            item: 'Clothing',
-            pickup: 'Rua de Santa Catarina, Porto',
-            drop: 'Rua de Dom Manuel II, Porto',
-            status: 'accepted',
-            courierId: 'CR-001'
-        }, {
-            id: 'CF-1043',
-            item: 'Electronics',
-            pickup: 'Praça de Mouzinho de Albuquerque, Porto',
-            drop: 'Avenida dos Aliados, Porto',
-            status: 'unassigned',
-            courierId: null
-        }, {
-            id: 'CF-1044',
-            item: 'Books',
-            pickup: 'Rua das Carmelitas, Porto',
-            drop: 'Campo 24 de Agosto, Porto',
-            status: 'accepted',
-            courierId: 'CR-001'
-        }, {
-            id: 'CF-1039',
-            item: 'Art supplies',
-            pickup: 'Rua de Cedofeita, Porto',
-            drop: 'Rua de Miguel Bombarda, Porto',
-            status: 'picked_up',
-            courierId: 'CR-002'
-        }, {
-            id: 'CF-1036',
-            item: 'Documents',
-            pickup: 'Rua de Júlio Dinis, Porto',
-            drop: 'Praça da Trindade, Porto',
-            status: 'delivered',
-            courierId: 'CR-003'
-        }]
-    });
+    }[ch]));
 
-    // Translate labels from the earlier demo without changing assignments or contacts.
-    function translateStoredDemo(data) {
-        const legacyItems = {
-            "Dokumenty": "Documents",
-            "Odzie\u017c": "Clothing",
-            "Elektronika": "Electronics",
-            "Ksi\u0105\u017cki": "Books",
-            "Materia\u0142y plastyczne": "Art supplies"
+    const money = value => new Intl.NumberFormat('en-IE', {
+        style: 'currency',
+        currency: 'EUR'
+    }).format(value);
+
+    const formatDateDDMMYYYY = value => {
+        if (!value) return '—';
+        const str = String(value).trim();
+        const isoMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(str);
+        if (isoMatch) {
+            return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
+        }
+        const dt = new Date(str);
+        if (!Number.isFinite(dt.getTime())) return str;
+        const pad = n => String(n).padStart(2, '0');
+        return `${pad(dt.getDate())}/${pad(dt.getMonth() + 1)}/${dt.getFullYear()}`;
+    };
+
+    const approvalBadge = status => {
+        const cls = status === 'Approved' ? 'available' : status === 'Rejected' ? 'rejected' : 'busy';
+        return `<span class="badge badge-${cls}">${esc(status || 'Pending')}</span>`;
+    };
+
+    const routeStatusLabels = {
+        available: 'Available / Unassigned',
+        unassigned: 'Available / Unassigned',
+        accepted: 'Accepted (Route Prepared)',
+        picked_up: 'Picked up (In Transit)',
+        delivered: 'Delivered (Completed)'
+    };
+
+    const routeBadge = status => {
+        const cls = status === 'delivered'
+            ? 'delivered'
+            : status === 'picked_up'
+                ? 'picked_up'
+                : status === 'accepted'
+                    ? 'accepted'
+                    : 'unassigned';
+        return `<span class="badge badge-${cls}">${esc(routeStatusLabels[status] || status)}</span>`;
+    };
+
+    // =========================================================================
+    // SEED DATA FOR STAFF GOVERNANCE & ADMIN PROFILE
+    // =========================================================================
+    function defaultAdminProfile() {
+        return {
+            name: currentUser?.name || 'Carlos Andrade',
+            username: currentUser?.username || 'carlos.admin',
+            email: currentUser?.email || 'admin@admin.demo',
+            phone: '+351 910 100 001',
+            nif: '219485730',
+            department: 'System Governance & Platform Administration'
         };
-        data.parcels.forEach(parcel => {
-            parcel.item = legacyItems[parcel.item] || parcel.item;
-        });
-        data.vehicles.forEach(vehicle => {
-            vehicle.type = vehicle.type.replace(/^Furgon(?= ·)/, 'Van');
-        });
-        return data;
     }
 
-    // STORAGE AND DATA INTEGRITY
-    function valid(data) {
-        if (!data || data.version !== 1 || !['couriers', 'vehicles', 'parcels'].every(k => Array.isArray(
-                data[k]))) return false;
-        const safeId = value => typeof value === 'string' && /^[a-zA-Z0-9-]{1,80}$/.test(value);
-        const text = value => typeof value === 'string' && value.length > 0 && value.length <= 300;
-        if (!['couriers', 'vehicles', 'parcels'].every(k => data[k].every(x => x && safeId(x.id)) &&
-                new Set(data[k].map(x => x.id)).size === data[k].length)) return false;
-        const ids = new Set(data.couriers.map(c => c.id));
-        if (!data.couriers.every(c => text(c.name) && text(c.phone) && /^[+0-9() .-]{5,30}$/.test(c
-                .phone) && text(c.email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email) && ['available',
-                'busy', 'offline'
-            ].includes(c.status))) return false;
-        const assigned = data.vehicles.filter(v => v.courierId !== null).map(v => v.courierId);
-        if (new Set(assigned).size !== assigned.length) return false;
-        if (!data.vehicles.every(v => text(v.model) && text(v.plate) && text(v.type) && (v.courierId ===
-                null || ids.has(v.courierId)))) return false;
-        if (!data.parcels.every(p => text(p.item) && text(p.pickup) && text(p.drop) && ['unassigned',
-                'accepted', 'picked_up', 'delivered'
-            ].includes(p.status) && (p.status === 'unassigned' ? p.courierId === null : ids.has(p
-                .courierId)))) return false;
-        return data.couriers.every(c => c.status !== 'offline' || !data.parcels.some(p => p.courierId ===
-            c.id && p.status !== 'delivered'));
+    function getAdminProfile() {
+        try {
+            const raw = localStorage.getItem(PROFILE_KEY);
+            if (!raw) return defaultAdminProfile();
+            const parsed = JSON.parse(raw);
+            return parsed && typeof parsed === 'object' ? { ...defaultAdminProfile(), ...parsed } : defaultAdminProfile();
+        } catch {
+            return defaultAdminProfile();
+        }
+    }
+
+    function saveAdminProfile(profile) {
+        try {
+            localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+        } catch { /* ignore */ }
+    }
+
+    function seedStaff() {
+        return {
+            version: 1,
+            staff: [
+                {
+                    id: 'ST-001',
+                    name: 'Helena Martins',
+                    username: 'helenamartins',
+                    nif: '231948572',
+                    phone: '+351 911 200 101',
+                    email: 'helena.martins@courierflow.pt',
+                    department: 'Fleet & Compliance Operations',
+                    approval_status: 'Approved',
+                    approved_by: 'Admin (admin@admin.demo)',
+                    createdAt: '2026-09-14T09:00:00.000Z'
+                },
+                {
+                    id: 'ST-002',
+                    name: 'Ricardo Ferreira',
+                    username: 'ricardoferreira',
+                    nif: '248591034',
+                    phone: '+351 911 200 102',
+                    email: 'ricardo.ferreira@courierflow.pt',
+                    department: 'Courier Validation & Dispatch',
+                    approval_status: 'Approved',
+                    approved_by: 'Admin (admin@admin.demo)',
+                    createdAt: '2026-09-20T10:30:00.000Z'
+                },
+                {
+                    id: 'ST-003',
+                    name: 'Beatriz Sousa',
+                    username: 'beatrizsousa',
+                    nif: '259301847',
+                    phone: '+351 911 200 103',
+                    email: 'beatriz.sousa@courierflow.pt',
+                    department: 'Certificate & Safety Auditing',
+                    approval_status: 'Pending',
+                    approved_by: null,
+                    createdAt: '2026-11-09T14:15:00.000Z'
+                },
+                {
+                    id: 'ST-004',
+                    name: 'Miguel Rocha',
+                    username: 'miguelrocha',
+                    nif: '267482910',
+                    phone: '+351 911 200 104',
+                    email: 'miguel.rocha@courierflow.pt',
+                    department: 'Regional Logistics Operations',
+                    approval_status: 'Pending',
+                    approved_by: null,
+                    createdAt: '2026-11-11T11:45:00.000Z'
+                }
+            ]
+        };
     }
 
     let canSave = true;
+    let toastTimer;
 
     function warn(message) {
+        if (!$('storageWarning')) return;
         $('storageWarning').textContent = message;
         $('storageWarning').hidden = false;
     }
 
-    function read() {
-        try {
-            const raw = localStorage.getItem(KEY);
-            if (!raw) return seed();
-            const data = JSON.parse(raw);
-            if (!valid(data)) throw new Error('Invalid admin data');
-            return translateStoredDemo(data);
-        } catch {
-            canSave = false;
-            warn(
-                'Saved data could not be loaded. Showing demo data. Changes will stay in memory; reset the demo to enable saving again.');
-            return seed();
-        }
-    }
-
-    let state = read();
-    let toastTimer;
-
     function toast(message) {
+        if (!$('toast')) return;
         $('toast').textContent = message;
         $('toast').hidden = false;
         clearTimeout(toastTimer);
@@ -202,531 +176,571 @@
         }, 4500);
     }
 
+    function readStaffState() {
+        try {
+            const raw = localStorage.getItem(STAFF_KEY);
+            if (!raw) return seedStaff();
+            const parsed = JSON.parse(raw);
+            if (!parsed || !Array.isArray(parsed.staff)) return seedStaff();
+            return parsed;
+        } catch {
+            canSave = false;
+            warn('Saved Staff data could not be loaded. Showing demo data.');
+            return seedStaff();
+        }
+    }
+
+    let state = readStaffState();
+
+    // Sync any newly registered Staff accounts from cms_users into state.staff
+    function syncRegisteredStaffFromUsers() {
+        try {
+            const users = JSON.parse(localStorage.getItem('cms_users') || '[]');
+            let changed = false;
+            users.filter(u => u && u.role === 'staff').forEach(u => {
+                const exists = state.staff.find(
+                    s => s.id === u.id || s.email.toLowerCase() === (u.email || '').toLowerCase()
+                );
+                if (!exists) {
+                    state.staff.push({
+                        id: u.id || `ST-${crypto.randomUUID().slice(0, 6).toUpperCase()}`,
+                        name: u.name || u.username || 'Staff Member',
+                        username: u.username || 'staff',
+                        nif: u.nif || '—',
+                        phone: u.phone || '+351 910 000 000',
+                        email: u.email,
+                        department: u.department || 'Operations & Validation',
+                        approval_status: u.approval_status || 'Pending',
+                        approved_by: u.approved_by || null,
+                        createdAt: u.createdAt || new Date().toISOString()
+                    });
+                    changed = true;
+                } else if (u.approval_status && exists.approval_status !== u.approval_status) {
+                    exists.approval_status = u.approval_status;
+                    changed = true;
+                }
+            });
+            if (changed && canSave) {
+                localStorage.setItem(STAFF_KEY, JSON.stringify(state));
+            }
+        } catch { /* ignore */ }
+    }
+
+    function syncStaffStatusToUsers(staffMember) {
+        try {
+            const users = JSON.parse(localStorage.getItem('cms_users') || '[]');
+            let updated = false;
+            users.forEach(u => {
+                if (u.role === 'staff' && (u.id === staffMember.id || (u.email && u.email.toLowerCase() === staffMember.email.toLowerCase()))) {
+                    u.approval_status = staffMember.approval_status;
+                    u.approved_by = staffMember.approved_by;
+                    u.name = staffMember.name;
+                    u.username = staffMember.username;
+                    u.phone = staffMember.phone;
+                    u.email = staffMember.email;
+                    u.nif = staffMember.nif;
+                    u.department = staffMember.department;
+                    updated = true;
+                }
+            });
+            if (updated) {
+                localStorage.setItem('cms_users', JSON.stringify(users));
+            }
+        } catch { /* ignore */ }
+    }
+
+    syncRegisteredStaffFromUsers();
+
     function save(message) {
         if (canSave) {
             try {
-                localStorage.setItem(KEY, JSON.stringify(state));
+                localStorage.setItem(STAFF_KEY, JSON.stringify(state));
             } catch {
                 canSave = false;
-                warn(
-                    'Browser storage is unavailable. Changes will last only until this page is reloaded or closed.');
+                warn('Browser storage is unavailable. Changes will last only until this page is reloaded.');
             }
         }
         render();
-        toast(message + (canSave ? '' : ' Change kept in this page only.'));
+        if (message) toast(message);
     }
 
-    function defaultSeedVehicles() {
-        return [
-            {
-                id: 'V-001',
-                courier_id: 'CR-001',
-                submitted_by_courier_id: 'CR-001',
-                submitted_by_courier_name: 'Alex Silva',
-                type_name: 'Van',
-                model: 'Renault Kangoo',
-                license_plate: 'AA-12-CF',
-                max_weight_kg: 650,
-                max_vol_m3: 3.3,
-                insurance_expiry_date: '2027-08-15',
-                inspection_expiry_date: '2027-06-20',
-                insurance_expiry_doc: 'kangoo_insurance.pdf',
-                inspection_expiry_doc: 'kangoo_inspection.pdf',
-                approval_status: 'Approved',
-                approved_by: 'Admin (admin@admin.demo)',
-                doc_updated_at: '2026-10-15T10:00:00.000Z',
-                created_at: '2026-10-10T09:00:00.000Z'
-            },
-            {
-                id: 'V-002',
-                courier_id: 'CR-002',
-                submitted_by_courier_id: 'CR-002',
-                submitted_by_courier_name: 'Maria Costa',
-                type_name: 'Van',
-                model: 'Peugeot Partner',
-                license_plate: 'AB-34-CF',
-                max_weight_kg: 750,
-                max_vol_m3: 3.7,
-                insurance_expiry_date: '2027-09-10',
-                inspection_expiry_date: '2027-07-01',
-                insurance_expiry_doc: 'partner_insurance.pdf',
-                inspection_expiry_doc: 'partner_inspection.pdf',
-                approval_status: 'Approved',
-                approved_by: 'Admin (admin@admin.demo)',
-                doc_updated_at: '2026-10-16T11:30:00.000Z',
-                created_at: '2026-10-12T14:20:00.000Z'
-            },
-            {
-                id: 'V-003',
-                courier_id: 'CR-001',
-                submitted_by_courier_id: 'CR-001',
-                submitted_by_courier_name: 'Alex Silva',
-                type_name: 'Motorcycle',
-                model: 'Honda PCX 125',
-                license_plate: 'MC-11-CF',
-                max_weight_kg: 2.0,
-                max_vol_m3: 0.003,
-                insurance_expiry_date: '2027-05-12',
-                inspection_expiry_date: '2027-04-18',
-                insurance_expiry_doc: 'pcx_insurance.pdf',
-                inspection_expiry_doc: 'pcx_inspection.pdf',
-                approval_status: 'Approved',
-                approved_by: 'Admin (admin@admin.demo)',
-                doc_updated_at: '2026-10-18T08:15:00.000Z',
-                created_at: '2026-10-18T08:00:00.000Z'
-            },
-            {
-                id: 'V-004',
-                courier_id: 'CR-002',
-                submitted_by_courier_id: 'CR-002',
-                submitted_by_courier_name: 'Maria Costa',
-                type_name: 'Bicycle',
-                model: 'Urban Cargo Bike',
-                license_plate: 'BK-05-CF',
-                max_weight_kg: 1.0,
-                max_vol_m3: 0.0018,
-                insurance_expiry_date: '2027-11-30',
-                inspection_expiry_date: '2027-11-30',
-                insurance_expiry_doc: 'bike_insurance.pdf',
-                inspection_expiry_doc: 'bike_inspection.pdf',
-                approval_status: 'Approved',
-                approved_by: 'Admin (admin@admin.demo)',
-                doc_updated_at: '2026-10-20T09:45:00.000Z',
-                created_at: '2026-10-19T16:10:00.000Z'
-            },
-            {
-                id: 'V-005',
-                courier_id: 'CR-003',
-                submitted_by_courier_id: 'CR-003',
-                submitted_by_courier_name: 'Daniel Santos',
-                type_name: 'Van',
-                model: 'Citroën Berlingo',
-                license_plate: 'AC-56-CF',
-                max_weight_kg: 650,
-                max_vol_m3: 3.3,
-                insurance_expiry_date: '2027-10-01',
-                inspection_expiry_date: '2027-08-22',
-                insurance_expiry_doc: 'berlingo_insurance.pdf',
-                inspection_expiry_doc: 'berlingo_inspection.pdf',
-                approval_status: 'Pending',
-                approved_by: null,
-                doc_updated_at: '2026-10-25T15:00:00.000Z',
-                created_at: '2026-10-25T15:00:00.000Z'
-            }
-        ];
-    }
+    // =========================================================================
+    // CROSS-SYSTEM DATA AGGREGATION FOR OPERATIONAL KPIS & ANALYTICS
+    // =========================================================================
+    const BASE_CATALOG = [
+        { id: 'CF-1041', item: 'Documents', pickup: 'Praça da Liberdade, Porto', drop: 'Praça da Ribeira, Porto', fee: 7.50, defaultStatus: 'available', defaultCourier: 'Unassigned' },
+        { id: 'CF-1042', item: 'Clothing', pickup: 'Rua de Santa Catarina, Porto', drop: 'Rua de Dom Manuel II, Porto', fee: 9.20, defaultStatus: 'available', defaultCourier: 'Alex Silva' },
+        { id: 'CF-1043', item: 'Electronics', pickup: 'Praça de Mouzinho de Albuquerque, Porto', drop: 'Avenida dos Aliados, Porto', fee: 12.80, defaultStatus: 'available', defaultCourier: 'Unassigned' },
+        { id: 'CF-1044', item: 'Books', pickup: 'Rua das Carmelitas, Porto', drop: 'Campo 24 de Agosto, Porto', fee: 8.60, defaultStatus: 'accepted', defaultCourier: 'Alex Silva' },
+        { id: 'CF-1039', item: 'Art supplies', pickup: 'Rua de Cedofeita, Porto', drop: 'Rua de Miguel Bombarda, Porto', fee: 8.40, defaultStatus: 'picked_up', defaultCourier: 'Maria Costa' },
+        { id: 'CF-1036', item: 'Documents', pickup: 'Rua de Júlio Dinis, Porto', drop: 'Praça da Trindade, Porto', fee: 6.50, defaultStatus: 'delivered', defaultCourier: 'Daniel Santos' }
+    ];
 
-    function getSubmittedVehicles() {
+    function gatherSystemMetrics() {
+        // 1. Users & Roles
+        let registeredUsers = [];
         try {
-            const raw = localStorage.getItem('cms_vehicles');
-            const seededFlag = localStorage.getItem('cms_vehicles_seeded_v2');
-            if (!raw) {
-                const initial = defaultSeedVehicles();
-                localStorage.setItem('cms_vehicles', JSON.stringify(initial));
-                localStorage.setItem('cms_vehicles_seeded_v2', '1');
-                return initial;
-            }
-            const data = JSON.parse(raw);
-            const list = Array.isArray(data) ? data : [];
-            if (!seededFlag) {
-                const defaults = defaultSeedVehicles();
-                const existingPlates = new Set(list.map(v => (v.license_plate || '').toUpperCase()));
-                defaults.forEach(d => {
-                    if (!existingPlates.has(d.license_plate.toUpperCase())) {
-                        list.push(d);
-                    }
-                });
-                localStorage.setItem('cms_vehicles', JSON.stringify(list));
-                localStorage.setItem('cms_vehicles_seeded_v2', '1');
-            }
-            return list;
-        } catch {
-            return defaultSeedVehicles();
-        }
-    }
-
-    function saveSubmittedVehicles(list) {
-        try {
-            localStorage.setItem('cms_vehicles', JSON.stringify(list));
-        } catch {
-            toast('Unable to save vehicle approval status.');
-        }
-    }
-
-    function getRouteAssignments() {
-        try {
-            const data = JSON.parse(localStorage.getItem('cms_route_assignments') || '{}');
-            return data && typeof data === 'object' ? data : {};
-        } catch {
-            return {};
-        }
-    }
-
-    function getCourierSubmitterName(vehicleOrId) {
-        if (vehicleOrId && typeof vehicleOrId === 'object') {
-            if (vehicleOrId.submitted_by_courier_name) return vehicleOrId.submitted_by_courier_name;
-            vehicleOrId = vehicleOrId.submitted_by_courier_id || vehicleOrId.courier_id;
-        }
-        const courierId = vehicleOrId;
-        if (!courierId || courierId === 'demo-courier') return 'Alex Silva';
-        const stateCourier = state.couriers.find(c => c.id === courierId);
-        if (stateCourier) return stateCourier.name;
-        try {
-            const users = JSON.parse(localStorage.getItem('cms_users') || '[]');
-            const found = users.find(u => u.id === courierId);
-            if (found && found.name) return found.name;
+            registeredUsers = JSON.parse(localStorage.getItem('cms_users') || '[]');
         } catch { /* ignore */ }
-        return courierId;
+
+        // Couriers from Staff store (or fallback seed count of 5)
+        let couriers = [
+            { id: 'CR-001', name: 'Alex Silva', approval_status: 'Approved', status: 'busy' },
+            { id: 'CR-002', name: 'Maria Costa', approval_status: 'Approved', status: 'busy' },
+            { id: 'CR-003', name: 'Daniel Santos', approval_status: 'Approved', status: 'available' },
+            { id: 'CR-004', name: 'Sofia Pereira', approval_status: 'Pending', status: 'available' },
+            { id: 'CR-005', name: 'Tiago Mendes', approval_status: 'Pending', status: 'available' }
+        ];
+        try {
+            const staffRaw = JSON.parse(localStorage.getItem('courierflow.staff.demo.v1') || 'null');
+            if (staffRaw && Array.isArray(staffRaw.couriers)) {
+                couriers = staffRaw.couriers;
+            }
+        } catch { /* ignore */ }
+
+        const regClients = registeredUsers.filter(u => u && u.role === 'client');
+        const baselineClients = 18; // Demo baseline active clients in Porto
+        const totalClients = baselineClients + regClients.length;
+
+        const approvedCouriers = couriers.filter(c => (c.approval_status || 'Approved') === 'Approved').length;
+        const pendingCouriers = couriers.filter(c => c.approval_status === 'Pending').length;
+
+        const approvedStaff = state.staff.filter(s => s.approval_status === 'Approved').length;
+        const pendingStaff = state.staff.filter(s => s.approval_status === 'Pending').length;
+
+        // 2. Vehicles & Fleet
+        let vehicles = [];
+        try {
+            vehicles = JSON.parse(localStorage.getItem('cms_vehicles') || '[]');
+        } catch { /* ignore */ }
+        const totalVehicles = vehicles.length || 6;
+        const approvedVehicles = vehicles.length
+            ? vehicles.filter(v => v.approval_status === 'Approved').length
+            : 4;
+
+        // 3. Routes / Orders & Route Assignments
+        let courierWorkflow = null;
+        try {
+            courierWorkflow = JSON.parse(localStorage.getItem('courierflow.courier.demo.v1') || 'null');
+        } catch { /* ignore */ }
+
+        let routeAssignments = {
+            'CF-1044': { order_id: 'CF-1044', vehicle_id: 'V-001', used_by_courier_name: 'Alex Silva' },
+            'CF-1039': { order_id: 'CF-1039', vehicle_id: 'V-002', used_by_courier_name: 'Maria Costa' },
+            'CF-1036': { order_id: 'CF-1036', vehicle_id: 'V-001', used_by_courier_name: 'Daniel Santos' }
+        };
+        try {
+            const raRaw = JSON.parse(localStorage.getItem('cms_route_assignments') || 'null');
+            if (raRaw && typeof raRaw === 'object') {
+                routeAssignments = raRaw;
+            }
+        } catch { /* ignore */ }
+
+        const vehicleMap = new Map(vehicles.map(v => [String(v.id), `${v.model} (${v.license_plate})`]));
+        if (!vehicleMap.size) {
+            vehicleMap.set('V-001', 'Renault Kangoo (AA-12-CF)');
+            vehicleMap.set('V-002', 'Peugeot Partner (AB-34-CF)');
+            vehicleMap.set('V-003', 'Honda PCX 125 (MC-11-CF)');
+            vehicleMap.set('V-004', 'Urban Cargo Bike (BK-05-CF)');
+        }
+
+        const routes = BASE_CATALOG.map(entry => {
+            const liveStatus = courierWorkflow?.jobs?.[entry.id]?.status || entry.defaultStatus;
+            const rAssign = routeAssignments[entry.id] || courierWorkflow?.jobs?.[entry.id]?.routeAssignment || null;
+            const courierLabel = rAssign?.used_by_courier_name || (liveStatus === 'available' ? 'Unassigned' : entry.defaultCourier);
+            const vehicleLabel = rAssign?.vehicle_id ? (vehicleMap.get(String(rAssign.vehicle_id)) || rAssign.vehicle_id) : 'Not selected yet';
+            return {
+                id: entry.id,
+                item: entry.item,
+                route: `${entry.pickup} → ${entry.drop}`,
+                pickup: entry.pickup,
+                drop: entry.drop,
+                status: liveStatus,
+                courier: courierLabel,
+                vehicle: vehicleLabel,
+                fee: entry.fee
+            };
+        });
+
+        // Also include any client-created orders from cms_orders
+        try {
+            const clientOrders = JSON.parse(localStorage.getItem('cms_orders') || '[]');
+            clientOrders.forEach(o => {
+                routes.push({
+                    id: o.code || `ORD-${String(o.id).slice(0, 5)}`,
+                    item: `${(o.products || []).length || 1} product(s)`,
+                    route: `${o.origin || 'Porto'} → ${o.destination || 'Porto'}`,
+                    pickup: o.origin || 'Porto',
+                    drop: o.destination || 'Porto',
+                    status: (o.status || '').toLowerCase() === 'delivered' ? 'delivered' : 'available',
+                    courier: 'Assigned via dispatch',
+                    vehicle: 'Shared pool',
+                    fee: 9.50
+                });
+            });
+        } catch { /* ignore */ }
+
+        const routeCounts = {
+            available: routes.filter(r => r.status === 'available' || r.status === 'unassigned').length,
+            accepted: routes.filter(r => r.status === 'accepted').length,
+            picked_up: routes.filter(r => r.status === 'picked_up').length,
+            delivered: routes.filter(r => r.status === 'delivered').length
+        };
+
+        const totalRevenue = routes.reduce((sum, r) => sum + (Number(r.fee) || 0), 0);
+        const completedRevenue = routes.filter(r => r.status === 'delivered').reduce((sum, r) => sum + (Number(r.fee) || 0), 0);
+
+        return {
+            couriersCount: couriers.length,
+            approvedCouriers,
+            pendingCouriers,
+            staffCount: state.staff.length,
+            approvedStaff,
+            pendingStaff,
+            totalClients,
+            regClientsCount: regClients.length,
+            totalVehicles,
+            approvedVehicles,
+            routes,
+            routeCounts,
+            totalRevenue,
+            completedRevenue
+        };
     }
 
-    // DASHBOARD AND COURIER CARDS
-    function renderStats() {
-        const allVehicles = getSubmittedVehicles();
-        const approvedCount = allVehicles.filter(v => v.approval_status === 'Approved').length;
-        const pendingCount = allVehicles.filter(v => v.approval_status === 'Pending').length;
-        const data = [
-            ['Couriers', state.couriers.length,
-                `${state.couriers.filter(c => c.status === 'available').length} available for assignment`
-            ],
-            ['Active parcels', state.parcels.filter(p => ['accepted', 'picked_up'].includes(p
-                .status)).length, 'Currently handled by your team'],
-            ['Unassigned', state.parcels.filter(p => !p.courierId).length,
-                'Waiting for assignment'
-            ],
-            ['Approved vehicles', approvedCount,
-                `${pendingCount} pending · shared across couriers`
-            ]
+    // =========================================================================
+    // RENDER FUNCTIONS
+    // =========================================================================
+    function renderHeaderAndProfile() {
+        const profile = getAdminProfile();
+        if ($('adminWorkspaceLabel')) {
+            $('adminWorkspaceLabel').textContent = `Admin · ${profile.name}`;
+        }
+        if ($('adminAvatar')) {
+            const initials = (profile.name || 'AD').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+            $('adminAvatar').textContent = initials || 'AD';
+        }
+        if ($('adminName') && document.activeElement?.form !== $('adminProfileForm')) {
+            $('adminName').value = profile.name || '';
+            $('adminUsername').value = profile.username || '';
+            $('adminEmail').value = profile.email || '';
+            $('adminPhone').value = profile.phone || '';
+            $('adminNif').value = profile.nif || '';
+            $('adminDepartment').value = profile.department || '';
+        }
+    }
+
+    function renderStatsAndAnalytics() {
+        const m = gatherSystemMetrics();
+
+        const primaryKpis = [
+            ['Total Staff Members', m.staffCount, `${m.approvedStaff} approved · ${m.pendingStaff} pending review`],
+            ['Total Couriers', m.couriersCount, `${m.approvedCouriers} approved · ${m.pendingCouriers} pending Staff review`],
+            ['Total Clients', m.totalClients, `${m.regClientsCount} newly registered in browser`],
+            ['Total Routes & Orders', m.routes.length, `${m.routeCounts.accepted + m.routeCounts.picked_up} active · ${m.routeCounts.delivered} completed`]
         ];
-        $('stats').innerHTML = data.map(([title, value, note]) =>
+
+        $('stats').innerHTML = primaryKpis.map(([title, value, note]) =>
             `<div class="dashboard-card"><h3>${title}</h3><strong>${value}</strong><p>${note}</p></div>`
         ).join('');
-        $('navCount').textContent = state.couriers.length;
+
+        if ($('operationalStats')) {
+            const completionRate = m.routes.length
+                ? Math.round((m.routeCounts.delivered / m.routes.length) * 100)
+                : 0;
+            const secondaryKpis = [
+                ['Pending Staff Approvals', m.pendingStaff, m.pendingStaff ? 'Awaiting Admin governance decision' : 'All Staff accounts reviewed'],
+                ['Routes In Progress', m.routeCounts.accepted + m.routeCounts.picked_up, `${m.routeCounts.accepted} accepted · ${m.routeCounts.picked_up} picked up`],
+                ['Shared Fleet Pool', `${m.approvedVehicles}/${m.totalVehicles}`, 'Approved vehicles available to couriers'],
+                ['Platform Route Volume', money(m.totalRevenue), `${money(m.completedRevenue)} completed · ${completionRate}% completion rate`]
+            ];
+            $('operationalStats').innerHTML = secondaryKpis.map(([title, value, note]) =>
+                `<div class="dashboard-card"><h3>${title}</h3><strong>${value}</strong><p>${note}</p></div>`
+            ).join('');
+        }
+
+        if ($('navCount')) {
+            $('navCount').textContent = m.pendingStaff || m.staffCount;
+        }
+
+        // Render Route Status Bars
+        const totalRoutes = Math.max(1, m.routes.length);
+        const routeBars = [
+            { label: 'Available / Unassigned', count: m.routeCounts.available, pct: Math.round((m.routeCounts.available / totalRoutes) * 100), color: '#64748b' },
+            { label: 'Accepted (Route Prepared)', count: m.routeCounts.accepted, pct: Math.round((m.routeCounts.accepted / totalRoutes) * 100), color: '#2563eb' },
+            { label: 'Picked Up (In Transit)', count: m.routeCounts.picked_up, pct: Math.round((m.routeCounts.picked_up / totalRoutes) * 100), color: '#d97706' },
+            { label: 'Delivered (Completed)', count: m.routeCounts.delivered, pct: Math.round((m.routeCounts.delivered / totalRoutes) * 100), color: '#16a34a' }
+        ];
+
+        if ($('routeAnalyticsBars')) {
+            $('routeAnalyticsBars').innerHTML = routeBars.map(b => `
+                <div class="analytics-bar-row">
+                    <div class="analytics-bar-label">
+                        <span>${esc(b.label)}</span>
+                        <strong>${b.count} (${b.pct}%)</strong>
+                    </div>
+                    <div class="analytics-bar-track">
+                        <div class="analytics-bar-fill" style="width: ${Math.max(b.count ? 6 : 0, b.pct)}%; background: ${b.color};"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render Role & Governance Bars
+        const totalUsers = Math.max(1, m.totalClients + m.couriersCount + m.staffCount);
+        const roleBars = [
+            { label: `Clients (${m.totalClients} active)`, count: m.totalClients, pct: Math.round((m.totalClients / totalUsers) * 100), color: '#2563eb' },
+            { label: `Couriers (${m.approvedCouriers} approved · ${m.pendingCouriers} pending)`, count: m.couriersCount, pct: Math.round((m.couriersCount / totalUsers) * 100), color: '#0891b2' },
+            { label: `Staff Members (${m.approvedStaff} approved · ${m.pendingStaff} pending)`, count: m.staffCount, pct: Math.round((m.staffCount / totalUsers) * 100), color: '#7c3aed' },
+            { label: `Shared Fleet Vehicles (${m.approvedVehicles} approved)`, count: m.totalVehicles, pct: Math.round((m.approvedVehicles / Math.max(1, m.totalVehicles)) * 100), color: '#16a34a' }
+        ];
+
+        if ($('roleAnalyticsBars')) {
+            $('roleAnalyticsBars').innerHTML = roleBars.map(b => `
+                <div class="analytics-bar-row">
+                    <div class="analytics-bar-label">
+                        <span>${esc(b.label)}</span>
+                        <strong>${b.count}</strong>
+                    </div>
+                    <div class="analytics-bar-track">
+                        <div class="analytics-bar-fill" style="width: ${Math.max(8, b.pct)}%; background: ${b.color};"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render Route Status Table
+        if ($('routeAnalyticsTable')) {
+            $('routeAnalyticsTable').innerHTML = m.routes.map(r => `
+                <tr>
+                    <td><strong>${esc(r.id)}</strong><p class="small">${esc(r.item)}</p></td>
+                    <td class="route">${esc(r.pickup)}<span>→ ${esc(r.drop)}</span></td>
+                    <td>${routeBadge(r.status)}</td>
+                    <td>${esc(r.courier)}</td>
+                    <td><span class="small"><strong>${esc(r.vehicle)}</strong></span></td>
+                    <td><strong>${money(r.fee)}</strong></td>
+                </tr>
+            `).join('');
+        }
     }
 
-    function renderCouriers() {
-        const query = $('courierSearch').value.trim().toLocaleLowerCase('en');
-        const filter = $('courierFilter').value;
-        const allVehicles = getSubmittedVehicles();
-        const found = state.couriers.filter(c => (filter === 'all' || c.status === filter) && [c.name, c
-            .phone, c.email, c.id
-        ].join(' ').toLocaleLowerCase('en').includes(query));
-        $('courierList').innerHTML = found.map(c => {
-            const submittedByCourier = allVehicles.filter(v => (v.submitted_by_courier_id || v.courier_id) === c.id);
-            const parcels = activeParcels(c.id);
-            const initials = c.name.trim().split(/\s+/).map(w => Array.from(w)[0]).slice(0, 2)
-                .join('');
-            return `<article class="courier-card">
-                <div class="courier-heading"><span class="courier-avatar" aria-hidden="true">${esc(initials)}</span><div><h3>${esc(c.name)}</h3><p class="small">${c.id}</p></div>${badge(c.status)}</div>
-                <div class="contact"><a href="tel:${esc(c.phone.replace(/[^+0-9]/g, ''))}">${esc(c.phone)}</a><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></div>
-                <p class="card-label">Submitted vehicles · ${submittedByCourier.length}</p>
-                <div class="parcel-chips">${submittedByCourier.length ? submittedByCourier.map(v => `<span class="parcel-chip">${esc(v.model)} (${esc(v.license_plate)}) · ${esc(v.approval_status)}</span>`).join('') : '<p class="small">No vehicles submitted</p>'}</div>
-                <p class="card-label">Active parcels · ${parcels.length}</p>
-                <div class="parcel-chips">${parcels.length ? parcels.map(p => `<a class="parcel-chip" href="#parcel-${p.id}">${p.id} · ${statuses[p.status]}</a>`).join('') : '<p class="small">No active parcels</p>'}</div>
-                <div class="card-actions"><button class="text-button" data-action="edit" data-id="${c.id}" aria-label="Edit courier: ${esc(c.name)}">Edit courier</button><button class="text-button danger" data-action="delete" data-id="${c.id}" aria-label="Delete courier: ${esc(c.name)}">Delete</button></div>
-            </article>`;
-        }).join('') || '<p class="empty-state">No couriers match your filters.</p>';
-    }
-
-    function renderParcels() {
-        const filter = $('parcelFilter').value;
-        const found = state.parcels.filter(p => filter === 'all' || p.status === filter);
-        $('parcelList').innerHTML = found.map(p => `<tr id="parcel-${p.id}">
-            <td><strong>${p.id}</strong><p class="small">${esc(p.item)}</p></td>
-            <td class="route">${esc(p.pickup)}<span>→ ${esc(p.drop)}</span></td>
-            <td>${badge(p.status)}</td><td>${esc(courierName(p.courierId))}</td>
-            <td>${p.status === 'delivered' ? '<span class="small">Completed</span>' : `<button class="btn btn-outline" data-action="parcel" data-id="${p.id}" aria-label="Assign courier to ${p.id}">${p.courierId ? 'Change' : 'Assign'}</button>`}</td>
-        </tr>`).join('') || '<tr><td colspan="5">No parcels in this view.</td></tr>';
-    }
-
-    function renderVehicles() {
-        const container = $('vehicleList');
+    function renderStaff() {
+        const container = $('staffList');
         if (!container) return;
 
-        const filter = $('approvalFilter') ? $('approvalFilter').value : 'all';
-        const allSubmitted = getSubmittedVehicles();
-        const routeAssignments = getRouteAssignments();
-        const filtered = allSubmitted.filter(v => filter === 'all' || v.approval_status === filter);
+        const query = ($('staffSearch')?.value || '').trim().toLocaleLowerCase('en');
+        const filter = $('staffApprovalFilter') ? $('staffApprovalFilter').value : 'all';
 
-        if (!filtered.length) {
-            container.innerHTML = `<p class="empty-state">${allSubmitted.length ? 'No vehicles match the selected approval status filter.' : 'No vehicles have been submitted by couriers yet.'}</p>`;
+        const found = state.staff.filter(s => {
+            const matchesFilter = filter === 'all' || s.approval_status === filter;
+            const matchesQuery = [s.name, s.username, s.nif, s.department, s.phone, s.email, s.id]
+                .join(' ')
+                .toLocaleLowerCase('en')
+                .includes(query);
+            return matchesFilter && matchesQuery;
+        });
+
+        if (!found.length) {
+            container.innerHTML = '<p class="empty-state">No Staff members match your current filters.</p>';
             return;
         }
 
-        container.innerHTML = filtered.map(v => {
-            const statusClass = v.approval_status === 'Approved' ? 'available' :
-                v.approval_status === 'Rejected' ? 'rejected' : 'busy';
-            const submitter = getCourierSubmitterName(v);
-            const activeRoutesForVehicle = Object.values(routeAssignments).filter(r => r && r.vehicle_id === v.id);
-
-            return `<article class="vehicle-card">
-                <span class="badge badge-${statusClass}">${esc(v.approval_status)}</span>
-                <h3>${esc(v.model)}</h3>
-                <span class="plate">${esc(v.license_plate)}</span>
-                <p>${esc(v.type_name)} · Submitted by <strong>${esc(submitter)}</strong></p>
-
-                <div class="submission-details">
-                    <div><span>Max Weight</span><strong>${esc(v.max_weight_kg)} kg</strong></div>
-                    <div><span>Max Volume</span><strong>${esc(v.max_vol_m3)} m³</strong></div>
-                    <div><span>Insurance Exp.</span><strong>${esc(v.insurance_expiry_date)}</strong></div>
-                    <div><span>Inspection Exp.</span><strong>${esc(v.inspection_expiry_date)}</strong></div>
-                    <div><span>Insurance Doc</span><strong>${esc(v.insurance_expiry_doc)}</strong></div>
-                    <div><span>Inspection Doc</span><strong>${esc(v.inspection_expiry_doc)}</strong></div>
+        container.innerHTML = found.map(s => {
+            const initials = s.name.trim().split(/\s+/).map(w => Array.from(w)[0]).slice(0, 2).join('').toUpperCase();
+            return `<article class="courier-card" id="staff-${esc(s.id)}">
+                <div class="courier-heading">
+                    <span class="courier-avatar" aria-hidden="true">${esc(initials)}</span>
+                    <div>
+                        <h3>${esc(s.name)}</h3>
+                        <p class="small">${esc(s.id)} · @${esc(s.username || 'staff')}</p>
+                    </div>
+                    ${approvalBadge(s.approval_status)}
                 </div>
 
-                <p class="small" style="margin-top: 8px;">
-                    ${v.approval_status === 'Approved'
-                        ? (activeRoutesForVehicle.length
-                            ? `Shared pool · Used on ${activeRoutesForVehicle.map(r => `${esc(r.order_id)} (${esc(r.used_by_courier_name || 'Courier')})`).join(', ')}`
-                            : 'Shared pool · Available to all couriers for compatible orders')
-                        : v.approval_status === 'Pending'
-                            ? 'Pending admin approval before couriers can select it'
-                            : 'Rejected · Not selectable by couriers'}
-                </p>
-                ${v.approved_by ? `<p class="small">Reviewed by: <strong>${esc(v.approved_by)}</strong></p>` : ''}
+                <div class="submission-details">
+                    <div><span>Department / Role</span><strong>${esc(s.department || 'Operations & Validation')}</strong></div>
+                    <div><span>NIF (Tax ID)</span><strong>${esc(s.nif || '—')}</strong></div>
+                    <div><span>Email</span><strong>${esc(s.email)}</strong></div>
+                    <div><span>Phone</span><strong>${esc(s.phone)}</strong></div>
+                    <div><span>Submitted Date</span><strong>${esc(formatDateDDMMYYYY(s.createdAt || '2026-10-01'))}</strong></div>
+                    <div><span>Reviewed By</span><strong>${esc(s.approved_by || 'Awaiting Admin review')}</strong></div>
+                </div>
 
                 <div class="approval-actions">
-                    <button class="btn btn-approve" data-action="approve-vehicle" data-id="${esc(v.id)}" ${v.approval_status === 'Approved' ? 'disabled' : ''}>
-                        Approve
+                    <button class="btn btn-approve" data-action="approve-staff" data-id="${esc(s.id)}" ${s.approval_status === 'Approved' ? 'disabled' : ''}>
+                        Approve staff
                     </button>
-                    <button class="btn btn-reject" data-action="reject-vehicle" data-id="${esc(v.id)}" ${v.approval_status === 'Rejected' ? 'disabled' : ''}>
+                    <button class="btn btn-reject" data-action="reject-staff" data-id="${esc(s.id)}" ${s.approval_status === 'Rejected' ? 'disabled' : ''}>
                         Reject
                     </button>
+                </div>
+
+                <div class="card-actions">
+                    <button class="text-button" data-action="edit-staff" data-id="${esc(s.id)}">Edit personal information</button>
+                    <button class="text-button danger" data-action="delete-staff" data-id="${esc(s.id)}">Delete</button>
                 </div>
             </article>`;
         }).join('');
     }
 
-    function updateVehicleApproval(id, newStatus) {
-        const list = getSubmittedVehicles();
-        const vehicle = list.find(v => String(v.id) === String(id));
-        if (!vehicle) return;
-
-        vehicle.approval_status = newStatus;
-        vehicle.approved_by = 'Admin (admin@admin.demo)';
-        vehicle.doc_updated_at = new Date().toISOString();
-
-        saveSubmittedVehicles(list);
-        render();
-        toast(`Vehicle ${vehicle.license_plate} (${vehicle.model}) ${newStatus.toLowerCase()}.`);
-    }
-
     function render() {
-        renderStats();
-        renderCouriers();
-        renderParcels();
-        renderVehicles();
+        syncRegisteredStaffFromUsers();
+        renderHeaderAndProfile();
+        renderStatsAndAnalytics();
+        renderStaff();
     }
 
-    // COURIER EDITOR
-    function editCourier(id) {
-        const form = $('courierForm');
+    // =========================================================================
+    // STAFF APPROVAL & PERSONAL INFORMATION EDITING
+    // =========================================================================
+    function updateStaffApproval(id, newStatus) {
+        const member = state.staff.find(s => String(s.id) === String(id));
+        if (!member) return;
+        const profile = getAdminProfile();
+        member.approval_status = newStatus;
+        member.approved_by = `${profile.name} (${profile.email})`;
+        syncStaffStatusToUsers(member);
+        save(`Staff member ${member.name} ${newStatus.toLowerCase()}.`);
+    }
+
+    function editStaff(id) {
+        const form = $('staffForm');
         form.reset();
-        Array.from(form.elements).forEach(field => {
-            if (field.setCustomValidity) field.setCustomValidity('');
-        });
         $('formError').textContent = '';
-        const courier = state.couriers.find(c => c.id === id);
-        $('courierTitle').textContent = courier ? 'Edit courier' : 'Add courier';
-        for (const key of ['id', 'name', 'phone', 'email', 'status']) form.elements.namedItem(key).value =
-            courier?.[key] || (key === 'status' ? 'available' : '');
-        $('courierDialog').showModal();
+        const member = state.staff.find(s => s.id === id);
+        $('staffTitle').textContent = member ? 'Edit staff personal information' : 'Add staff member';
+        for (const key of ['id', 'name', 'username', 'nif', 'phone', 'email', 'department', 'approval_status']) {
+            const field = form.elements.namedItem(key);
+            if (!field) continue;
+            field.value = member?.[key] || (key === 'approval_status' ? 'Pending' : '');
+        }
+        $('staffDialog').showModal();
     }
 
-    // Use English validation messages regardless of the browser's interface language.
-    $('courierForm').addEventListener('invalid', event => {
-        const field = event.target;
-        const messages = {
-            name: 'Enter the courier’s full name.',
-            phone: 'Enter a valid phone number using digits, spaces and an optional + sign.',
-            email: 'Enter a valid email address.'
-        };
-        field.setCustomValidity(messages[field.name] || 'Please complete this field.');
-    }, true);
-    $('courierForm').addEventListener('input', event => {
-        if (event.target.setCustomValidity) event.target.setCustomValidity('');
-    });
-
-    $('courierForm').addEventListener('submit', event => {
+    $('staffForm')?.addEventListener('submit', event => {
         event.preventDefault();
         const data = Object.fromEntries(new FormData(event.currentTarget));
-        for (const key of ['name', 'phone', 'email']) data[key] = data[key].trim();
-        const existing = state.couriers.find(c => c.id === data.id);
+        for (const key of ['name', 'username', 'nif', 'phone', 'email', 'department']) {
+            data[key] = (data[key] || '').trim();
+        }
+        const existing = state.staff.find(s => s.id === data.id);
         const error = message => {
             $('formError').textContent = message;
         };
-        if (!data.name || !/^[+0-9() .-]{5,30}$/.test(data.phone) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/
-            .test(data.email)) return error(
-            'Enter a full name, a valid phone number and a valid email address.');
-        if (data.id && !existing) return error(
-            'This courier has been deleted. Close the form and refresh the list.');
-        if (data.status === 'offline' && existing && activeParcels(existing.id).length)
-            return error('Reassign active parcels to another courier first.');
-        if (state.couriers.some(c => c.id !== data.id && c.email.toLowerCase() === data.email
-                .toLowerCase())) return error(
-            'This email address is already assigned to another courier.');
-        if (existing) Object.assign(existing, data);
-        else state.couriers.push({
-            ...data,
-            id: `CR-${crypto.randomUUID()}`
-        });
-        $('courierDialog').close();
-        save(existing ? 'Courier details updated.' : 'New courier added.');
+
+        if (!data.name || !/^[+0-9() .-]{5,30}$/.test(data.phone) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+            return error('Enter a full name, a valid phone number and a valid email address.');
+        }
+        if (state.staff.some(s => s.id !== data.id && s.email.toLowerCase() === data.email.toLowerCase())) {
+            return error('This email address is already assigned to another Staff member.');
+        }
+
+        const profile = getAdminProfile();
+        if (existing) {
+            Object.assign(existing, data);
+            if (data.approval_status !== 'Pending' && !existing.approved_by) {
+                existing.approved_by = `${profile.name} (${profile.email})`;
+            }
+            syncStaffStatusToUsers(existing);
+        } else {
+            const created = {
+                ...data,
+                id: `ST-${crypto.randomUUID().slice(0, 6).toUpperCase()}`,
+                approved_by: data.approval_status === 'Pending' ? null : `${profile.name} (${profile.email})`,
+                createdAt: new Date().toISOString()
+            };
+            state.staff.push(created);
+            syncStaffStatusToUsers(created);
+        }
+        $('staffDialog').close();
+        save(existing ? 'Staff personal information updated.' : 'New Staff member added.');
     });
 
-    // PARCEL ASSIGNMENTS
-    function assignment(kind, id) {
-        if (kind !== 'parcel') return;
-        const form = $('assignmentForm');
-        const select = $('assignmentSelect');
-        form.elements.namedItem('kind').value = kind;
-        form.elements.namedItem('target').value = id;
-        $('assignmentError').textContent = '';
-
-        const target = state.parcels.find(x => x.id === id);
-        if (!target || target.status === 'delivered') return;
-
-        $('assignmentTitle').textContent = 'Assign parcel';
-        $('assignmentDescription').textContent =
-            `${target.id} · ${target.item}. Unavailable couriers cannot be selected. A picked-up parcel must remain assigned to a courier.`;
-
-        const current = target.courierId || '';
-        const options = state.couriers.map(c => ({
-            id: c.id,
-            label: `${c.name} · ${statuses[c.status]}`,
-            disabled: c.status === 'offline'
-        }));
-
-        select.innerHTML =
-            `<option value="" ${target.status === 'picked_up' ? 'disabled' : ''}>Unassigned</option>` +
-            options.map(o =>
-                `<option value="${o.id}" ${o.disabled ? 'disabled' : ''}>${esc(o.label)}</option>`).join(
-                '');
-        select.value = current;
-        $('assignmentDialog').showModal();
-    }
-
-    $('assignmentForm').addEventListener('submit', event => {
+    $('adminProfileForm')?.addEventListener('submit', event => {
         event.preventDefault();
-        const {
-            kind,
-            target,
-            selection
-        } = Object.fromEntries(new FormData(event.currentTarget));
-        const error = message => {
-            $('assignmentError').textContent = message;
-        };
-        if (kind === 'parcel') {
-            const parcel = state.parcels.find(p => p.id === target);
-            if (!parcel || parcel.status === 'delivered') return error(
-                'This parcel cannot be changed.');
-            const courier = state.couriers.find(c => c.id === selection);
-            if (selection && (!courier || courier.status === 'offline')) return error(
-                'Select an available courier.');
-            if (!selection && parcel.status === 'picked_up') return error(
-                'A picked-up parcel must have an assigned courier.');
-            parcel.courierId = selection || null;
-            if (parcel.status !== 'picked_up') parcel.status = selection ? 'accepted' :
-                'unassigned';
-        } else return error('Unknown assignment type.');
-        $('assignmentDialog').close();
-        save('Assignment saved.');
+        const data = Object.fromEntries(new FormData(event.currentTarget));
+        for (const key of ['name', 'username', 'email', 'phone', 'nif', 'department']) {
+            data[key] = (data[key] || '').trim();
+        }
+        if (!data.name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+            toast('Please enter a valid full name and email address.');
+            return;
+        }
+        saveAdminProfile(data);
+        renderHeaderAndProfile();
+        toast('Administrator personal information saved.');
     });
 
-    // CONFIRMATION AND EVENTS
     function confirmAction(title, text) {
         $('confirmTitle').textContent = title;
         $('confirmText').textContent = text;
         const dialog = $('confirmDialog');
         dialog.returnValue = 'cancel';
         dialog.showModal();
-        return new Promise(resolve => dialog.addEventListener('close', () => resolve(dialog
-            .returnValue === 'confirm'), {
-            once: true
-        }));
+        return new Promise(resolve => dialog.addEventListener('close', () => resolve(dialog.returnValue === 'confirm'), { once: true }));
     }
 
-    async function deleteCourier(id) {
-        const courier = state.couriers.find(c => c.id === id);
-        if (!courier) return;
-        if (state.parcels.some(p => p.courierId === id)) {
-            toast(
-                'A courier with assigned parcels or delivery history cannot be deleted. You can mark them as unavailable after reassigning their active deliveries.');
-            return;
-        }
-        if (!await confirmAction('Delete courier?',
-                `${courier.name} will be deleted from the courier directory.`)) return;
-        if (state.parcels.some(p => p.courierId === id)) return toast(
-            'Assignments have changed. Review the courier’s parcels.');
-        state.couriers = state.couriers.filter(c => c.id !== id);
-        save('Courier deleted.');
+    async function deleteStaff(id) {
+        const member = state.staff.find(s => s.id === id);
+        if (!member) return;
+        if (!await confirmAction('Delete Staff member?', `${member.name} (${member.id}) will be removed from the Staff directory.`)) return;
+        state.staff = state.staff.filter(s => s.id !== id);
+        save('Staff member deleted.');
     }
 
+    // =========================================================================
+    // EVENT LISTENERS
+    // =========================================================================
     document.addEventListener('click', event => {
         const close = event.target.closest('[data-close]');
-        if (close) $(close.dataset.close).close();
+        if (close) $(close.dataset.close)?.close();
+
         const button = event.target.closest('[data-action]');
         if (!button) return;
-        const {
-            action,
-            id
-        } = button.dataset;
-        if (action === 'edit') editCourier(id);
-        else if (action === 'delete') deleteCourier(id);
-        else if (action === 'approve-vehicle') updateVehicleApproval(id, 'Approved');
-        else if (action === 'reject-vehicle') updateVehicleApproval(id, 'Rejected');
-        else assignment(action, id);
+        const { action, id } = button.dataset;
+
+        if (action === 'approve-staff') updateStaffApproval(id, 'Approved');
+        else if (action === 'reject-staff') updateStaffApproval(id, 'Rejected');
+        else if (action === 'edit-staff') editStaff(id);
+        else if (action === 'delete-staff') deleteStaff(id);
     });
-    $('addCourier').addEventListener('click', () => editCourier());
-    $('courierSearch').addEventListener('input', renderCouriers);
-    $('courierFilter').addEventListener('change', renderCouriers);
-    $('parcelFilter').addEventListener('change', renderParcels);
-    if ($('approvalFilter')) $('approvalFilter').addEventListener('change', renderVehicles);
-    $('resetDemo').addEventListener('click', async () => {
-        if (!await confirmAction('Reset demo data?',
-                'Couriers, parcel assignments and vehicle registrations in the admin dashboard will return to their initial values.'
+
+    $('addStaff')?.addEventListener('click', () => editStaff());
+    $('staffSearch')?.addEventListener('input', renderStaff);
+    $('staffApprovalFilter')?.addEventListener('change', renderStaff);
+
+    $('resetDemo')?.addEventListener('click', async () => {
+        if (!await confirmAction('Reset Admin governance data?',
+                'Staff directory, approval statuses and administrator profile will return to their initial demo values.'
             )) return;
-        state = seed();
+        state = seedStaff();
         try {
-            localStorage.setItem('cms_vehicles', JSON.stringify(defaultSeedVehicles()));
-            localStorage.setItem('cms_vehicles_seeded_v2', 'true');
-        } catch (_) {}
+            localStorage.removeItem(PROFILE_KEY);
+        } catch { /* ignore */ }
         canSave = true;
-        $('storageWarning').hidden = true;
-        $('courierSearch').value = '';
-        $('courierFilter').value = 'all';
-        $('parcelFilter').value = 'all';
-        if ($('approvalFilter')) $('approvalFilter').value = 'all';
-        save('Demo data restored.');
+        if ($('storageWarning')) $('storageWarning').hidden = true;
+        if ($('staffSearch')) $('staffSearch').value = '';
+        if ($('staffApprovalFilter')) $('staffApprovalFilter').value = 'all';
+        save('Admin demo data restored.');
     });
 
     function nav() {
         const section = location.hash.slice(1) || 'overview';
         document.querySelectorAll('[data-nav]').forEach(link => {
-            const active = link.dataset.nav === section || (section.startsWith('parcel-') && link
-                .dataset.nav === 'parcels');
+            const active = link.dataset.nav === section;
             link.classList.toggle('active', active);
             if (active) link.setAttribute('aria-current', 'location');
             else link.removeAttribute('aria-current');
         });
-        if (section.startsWith('parcel-')) {
-            $('parcelFilter').value = 'all';
-            renderParcels();
-            requestAnimationFrame(() => document.getElementById(section)?.scrollIntoView());
-        }
     }
+
     window.addEventListener('hashchange', nav);
-    window.addEventListener('storage', event => {
-        if (event.key === 'cms_vehicles' || event.key === 'cms_route_assignments') {
-            render();
-            toast('Vehicle pool or route assignments updated.');
-            return;
-        }
-        if (event.key !== KEY && event.key !== null) return;
-        state = read();
-        document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+    window.addEventListener('storage', () => {
+        state = readStaffState();
         render();
-        toast('Data changed in another tab. The list has been refreshed.');
+        toast('System metrics or Staff records updated.');
     });
+
     render();
     nav();
 })();

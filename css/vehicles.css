@@ -404,6 +404,18 @@
     background: #fef2f2;
 }
 
+.vehicle-delete:disabled {
+    opacity: 0.5;
+    color: #94a3b8;
+    border-color: #e2e8f0;
+    background: #f8fafc;
+    cursor: not-allowed;
+}
+
+.vehicle-delete:disabled:hover {
+    background: #f8fafc;
+}
+
 /* RESPONSIVE */
 
 @media (max-width: 1000px) {

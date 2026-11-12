@@ -125,6 +125,11 @@ button:disabled {
     margin-right: 8px
 }
 
+.workspace-label {
+    font-size: 12px;
+    color: var(--muted)
+}
+
 .avatar {
     background: #e0e7ff;
     color: #3730a3;
@@ -1440,6 +1445,7 @@ footer span {
         gap: 0
     }
 
+    .workspace-label,
     .avatar {
         display: none
     }

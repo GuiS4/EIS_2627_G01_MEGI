@@ -160,6 +160,15 @@ function resolveSubmitterName(vehicle) {
     return subId === "demo-courier" ? "Alex Silva" : (subId || "Unknown Courier");
 }
 
+function isSubmittedByCurrentCourier(vehicle) {
+    const current = getActiveCourierIdentity();
+    const submitterId = vehicle.submitted_by_courier_id || vehicle.courier_id;
+    if (!submitterId) return false;
+    if (submitterId === current.id) return true;
+    if (current.id === "CR-001" && submitterId === "demo-courier") return true;
+    return false;
+}
+
 // =====================================
 // STORAGE
 // =====================================
@@ -562,7 +571,8 @@ function renderVehicles() {
             ? "Document expired: vehicle unavailable for allocation."
             : "Documents are within their validity dates.";
 
-        // Delete action - for prototype
+        // Delete action - only allowed for the courier who submitted the vehicle
+        const isOwner = isSubmittedByCurrentCourier(vehicle);
         const actionsRow = document.createElement("div");
         actionsRow.className = "vehicle-accordion-actions";
 
@@ -570,9 +580,17 @@ function renderVehicles() {
         deleteButton.type = "button";
         deleteButton.className = "vehicle-delete";
         deleteButton.textContent = "Delete Vehicle";
+        deleteButton.disabled = !isOwner;
+        if (!isOwner) {
+            deleteButton.title = "Only the courier who submitted this vehicle can delete it.";
+        }
 
         deleteButton.addEventListener("click", function(event) {
             event.stopPropagation();
+
+            if (!isSubmittedByCurrentCourier(vehicle)) {
+                return;
+            }
 
             if (!confirm("Delete this vehicle?")) {
                 return;
@@ -646,10 +664,30 @@ if (resetDemoBtn) {
     });
 }
 
+function renderCourierHeaderIdentity() {
+    const active = getActiveCourierIdentity();
+    const label = document.getElementById("courierWorkspaceLabel");
+    const avatar = document.getElementById("courierAvatar");
+    if (label) {
+        label.textContent = `Courier · ${active.name}`;
+    }
+    if (avatar) {
+        const initials = (active.name || "CR")
+            .trim()
+            .split(/\s+/)
+            .map(w => w[0])
+            .slice(0, 2)
+            .join("")
+            .toUpperCase();
+        avatar.textContent = initials || "CR";
+    }
+}
+
 // =====================================
 // INITIALIZATION
 // =====================================
 
+renderCourierHeaderIdentity();
 syncCourierSidebarCounts();
 renderVehicles();
 

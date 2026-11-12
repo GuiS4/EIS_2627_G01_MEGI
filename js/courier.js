@@ -1474,6 +1474,26 @@
             }
         }
     });
+    function renderCourierHeaderIdentity() {
+        const active = getActiveCourier();
+        const label = $('courierWorkspaceLabel');
+        const avatar = $('courierAvatar');
+        if (label) {
+            label.textContent = `Courier · ${active.name}`;
+        }
+        if (avatar) {
+            const initials = (active.name || 'CR')
+                .trim()
+                .split(/\s+/)
+                .map(w => w[0])
+                .slice(0, 2)
+                .join('')
+                .toUpperCase();
+            avatar.textContent = initials || 'CR';
+        }
+    }
+
+    renderCourierHeaderIdentity();
     render();
     nav();
 })();

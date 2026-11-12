@@ -432,6 +432,8 @@ select {
 }
 
 .courier-card {
+    display: flex;
+    flex-direction: column;
     background: white;
     border: 1px solid var(--line);
     border-radius: 12px;
@@ -530,6 +532,7 @@ select {
     display: flex;
     flex-wrap: wrap;
     gap: 7px;
+    margin-bottom: 18px;
 }
 
 .parcel-chip {
@@ -547,7 +550,7 @@ select {
     gap: 18px;
     padding-top: 18px;
     border-top: 1px solid var(--line);
-    margin-top: 18px;
+    margin-top: auto;
 }
 
 .danger {
@@ -615,9 +618,13 @@ td:first-child strong {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 18px;
+    align-items: stretch;
 }
 
 .vehicle-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     background: white;
     border: 1px solid var(--line);
     border-radius: 12px;
@@ -625,10 +632,12 @@ td:first-child strong {
 }
 
 .vehicle-card .badge {
+    align-self: flex-start;
     margin-bottom: 14px;
 }
 
 .plate {
+    align-self: flex-start;
     display: inline-block;
     margin: 12px 0;
     padding: 3px 9px;
@@ -657,8 +666,10 @@ td:first-child strong {
 }
 
 .submission-details {
+    flex: 1;
     display: grid;
     grid-template-columns: 1fr 1fr;
+    align-content: start;
     gap: 10px;
     margin: 14px 0;
     padding: 12px;
@@ -686,7 +697,8 @@ td:first-child strong {
 .approval-actions {
     display: flex;
     gap: 10px;
-    margin-top: 16px;
+    margin-top: auto;
+    padding-top: 16px;
 }
 
 .approval-actions .btn {

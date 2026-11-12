@@ -25,6 +25,10 @@
         item: 'Documents',
         weight: 0.3,
         volume: 0.0005,
+        products: [
+            { name: 'Legal contract folder', weight_kg: 0.2, volume_m3: 0.0003 },
+            { name: 'Notary dossier', weight_kg: 0.1, volume_m3: 0.0002 }
+        ],
         fee: 7.50,
         pickup: {
             name: 'Central Studio',
@@ -45,6 +49,10 @@
         item: 'Clothing',
         weight: 1.2,
         volume: 0.0035,
+        products: [
+            { name: 'Winter coat', weight_kg: 0.8, volume_m3: 0.0025 },
+            { name: 'Apparel box', weight_kg: 0.4, volume_m3: 0.0010 }
+        ],
         fee: 9.20,
         pickup: {
             name: 'North Boutique',
@@ -65,6 +73,10 @@
         item: 'Electronics',
         weight: 2.5,
         volume: 0.002,
+        products: [
+            { name: 'Workstation monitor', weight_kg: 2.0, volume_m3: 0.0015 },
+            { name: 'Docking station', weight_kg: 0.5, volume_m3: 0.0005 }
+        ],
         fee: 12.80,
         pickup: {
             name: 'Tech Workshop',
@@ -85,6 +97,9 @@
         item: 'Books',
         weight: 1.8,
         volume: 0.004,
+        products: [
+            { name: 'Hardcover textbooks (x3)', weight_kg: 1.8, volume_m3: 0.004 }
+        ],
         fee: 8.60,
         pickup: {
             name: 'City Bookshop',
@@ -105,6 +120,9 @@
         item: 'Art supplies',
         weight: 0.8,
         volume: 0.0015,
+        products: [
+            { name: 'Canvas & acrylic set', weight_kg: 0.8, volume_m3: 0.0015 }
+        ],
         fee: 8.40,
         pickup: {
             name: 'Art Supply Store',
@@ -125,6 +143,9 @@
         item: 'Documents',
         weight: 0.2,
         volume: 0.0003,
+        products: [
+            { name: 'Sealed archive envelope', weight_kg: 0.2, volume_m3: 0.0003 }
+        ],
         fee: 6.50,
         pickup: {
             name: 'West Office',
@@ -141,6 +162,287 @@
         note: 'Envelope delivered to reception.',
         window: 'Demo window: 09:00–18:00'
     }];
+
+    // =========================================================================
+    // VEHICLE POOL, CAPACITY VALIDATION & ROUTE ASSIGNMENTS
+    // =========================================================================
+    const COURIER_DIRECTORY = {
+        'CR-001': 'Alex Silva',
+        'CR-002': 'Maria Costa',
+        'CR-003': 'Daniel Santos'
+    };
+
+    function defaultSeedVehicles() {
+        return [
+            {
+                id: 'V-001',
+                courier_id: 'CR-001',
+                submitted_by_courier_id: 'CR-001',
+                submitted_by_courier_name: 'Alex Silva',
+                vehicle_type_id: 'van',
+                type_name: 'Van',
+                model: 'Renault Kangoo',
+                license_plate: 'AA-12-CF',
+                max_weight_kg: 650,
+                max_vol_m3: 3.3,
+                doc_number: 'PT-DOC-2026-001',
+                approval_status: 'Approved',
+                approved_by: 'admin@admin.demo',
+                created_at: '2026-10-15T09:00:00.000Z'
+            },
+            {
+                id: 'V-002',
+                courier_id: 'CR-002',
+                submitted_by_courier_id: 'CR-002',
+                submitted_by_courier_name: 'Maria Costa',
+                vehicle_type_id: 'van',
+                type_name: 'Van',
+                model: 'Peugeot Partner',
+                license_plate: 'AB-34-CF',
+                max_weight_kg: 750,
+                max_vol_m3: 3.7,
+                doc_number: 'PT-DOC-2026-002',
+                approval_status: 'Approved',
+                approved_by: 'admin@admin.demo',
+                created_at: '2026-10-16T10:30:00.000Z'
+            },
+            {
+                id: 'V-003',
+                courier_id: 'CR-001',
+                submitted_by_courier_id: 'CR-001',
+                submitted_by_courier_name: 'Alex Silva',
+                vehicle_type_id: 'motorcycle',
+                type_name: 'Motorcycle',
+                model: 'Honda PCX 125',
+                license_plate: 'MC-11-CF',
+                max_weight_kg: 2.0,
+                max_vol_m3: 0.003,
+                doc_number: 'PT-DOC-2026-003',
+                approval_status: 'Approved',
+                approved_by: 'admin@admin.demo',
+                created_at: '2026-10-18T11:15:00.000Z'
+            },
+            {
+                id: 'V-004',
+                courier_id: 'CR-002',
+                submitted_by_courier_id: 'CR-002',
+                submitted_by_courier_name: 'Maria Costa',
+                vehicle_type_id: 'bicycle',
+                type_name: 'Bicycle',
+                model: 'Urban Cargo Bike',
+                license_plate: 'BK-05-CF',
+                max_weight_kg: 1.0,
+                max_vol_m3: 0.0018,
+                doc_number: 'PT-DOC-2026-004',
+                approval_status: 'Approved',
+                approved_by: 'admin@admin.demo',
+                created_at: '2026-10-19T14:00:00.000Z'
+            },
+            {
+                id: 'V-005',
+                courier_id: 'CR-003',
+                submitted_by_courier_id: 'CR-003',
+                submitted_by_courier_name: 'Daniel Santos',
+                vehicle_type_id: 'van',
+                type_name: 'Van',
+                model: 'Citroën Berlingo',
+                license_plate: 'AC-56-CF',
+                max_weight_kg: 650,
+                max_vol_m3: 3.3,
+                doc_number: 'PT-DOC-2026-005',
+                approval_status: 'Pending',
+                approved_by: null,
+                created_at: '2026-10-20T16:45:00.000Z'
+            }
+        ];
+    }
+
+    function getVehicles() {
+        try {
+            const raw = localStorage.getItem('cms_vehicles');
+            const seededFlag = localStorage.getItem('cms_vehicles_seeded_v2');
+            let list = raw ? JSON.parse(raw) : [];
+            if (!Array.isArray(list)) list = [];
+            if (!seededFlag) {
+                const defaults = defaultSeedVehicles();
+                const existingIds = new Set(list.map(v => v.id));
+                defaults.forEach(d => {
+                    if (!existingIds.has(d.id)) list.push(d);
+                });
+                localStorage.setItem('cms_vehicles', JSON.stringify(list));
+                localStorage.setItem('cms_vehicles_seeded_v2', 'true');
+            }
+            return list;
+        } catch {
+            return defaultSeedVehicles();
+        }
+    }
+
+    function getApprovedVehicles() {
+        return getVehicles().filter(v => v.approval_status === 'Approved');
+    }
+
+    function resolveSubmitterName(vehicle) {
+        if (vehicle.submitted_by_courier_name) return vehicle.submitted_by_courier_name;
+        const subId = vehicle.submitted_by_courier_id || vehicle.courier_id;
+        if (subId && COURIER_DIRECTORY[subId]) return COURIER_DIRECTORY[subId];
+        try {
+            const users = JSON.parse(localStorage.getItem('cms_users')) || [];
+            const matchUser = users.find(u => u.id === subId);
+            if (matchUser) return matchUser.fullName || matchUser.name || matchUser.email;
+        } catch (_) {}
+        return subId ? `Courier #${subId}` : 'Courier';
+    }
+
+    function getActiveCourier() {
+        const selectEl = $('activeCourierSelect');
+        try {
+            const currentUser = JSON.parse(localStorage.getItem('cms_current_user'));
+            if (currentUser && currentUser.role === 'courier' && currentUser.id) {
+                const name = currentUser.fullName || currentUser.name || currentUser.email || 'Courier';
+                COURIER_DIRECTORY[currentUser.id] = name;
+                if (selectEl && !Array.from(selectEl.options).some(o => o.value === String(currentUser.id))) {
+                    const opt = document.createElement('option');
+                    opt.value = String(currentUser.id);
+                    opt.textContent = `${name} (${currentUser.id})`;
+                    selectEl.prepend(opt);
+                }
+            }
+        } catch (_) {}
+
+        if (selectEl && selectEl.value) {
+            const id = selectEl.value;
+            return { id, name: COURIER_DIRECTORY[id] || `Courier ${id}` };
+        }
+        return { id: 'CR-001', name: 'Alex Silva' };
+    }
+
+    function defaultRouteAssignments() {
+        return {
+            'CF-1044': {
+                order_id: 'CF-1044',
+                vehicle_id: 'V-001',
+                used_by_courier_id: 'CR-001',
+                used_by_courier_name: 'Alex Silva',
+                assigned_at: '2026-10-25T09:00:00.000Z'
+            },
+            'CF-1039': {
+                order_id: 'CF-1039',
+                vehicle_id: 'V-002',
+                used_by_courier_id: 'CR-002',
+                used_by_courier_name: 'Maria Costa',
+                assigned_at: '2026-10-25T08:40:00.000Z'
+            },
+            'CF-1036': {
+                order_id: 'CF-1036',
+                vehicle_id: 'V-001',
+                used_by_courier_id: 'CR-003',
+                used_by_courier_name: 'Daniel Santos',
+                assigned_at: '2026-10-24T10:00:00.000Z'
+            }
+        };
+    }
+
+    function getRouteAssignments() {
+        try {
+            const raw = localStorage.getItem('cms_route_assignments');
+            if (!raw) {
+                const defaults = defaultRouteAssignments();
+                localStorage.setItem('cms_route_assignments', JSON.stringify(defaults));
+                return defaults;
+            }
+            const parsed = JSON.parse(raw);
+            return parsed && typeof parsed === 'object' ? parsed : defaultRouteAssignments();
+        } catch {
+            return defaultRouteAssignments();
+        }
+    }
+
+    function saveRouteAssignments(assignments) {
+        try {
+            localStorage.setItem('cms_route_assignments', JSON.stringify(assignments));
+        } catch (_) {}
+    }
+
+    function getOrderTotals(job) {
+        if (Array.isArray(job.products) && job.products.length > 0) {
+            const totalWeight = job.products.reduce((sum, p) => sum + (Number(p.weight_kg) || 0), 0);
+            const totalVolume = job.products.reduce((sum, p) => sum + (Number(p.volume_m3) || 0), 0);
+            return {
+                weight_kg: Number(totalWeight.toFixed(4)),
+                volume_m3: Number(totalVolume.toFixed(6))
+            };
+        }
+        return {
+            weight_kg: Number(job.weight) || 0,
+            volume_m3: Number(job.volume) || 0
+        };
+    }
+
+    function evaluateVehicleCompatibility(vehicle, orderTotals) {
+        const maxWeight = Number(vehicle.max_weight_kg) || 0;
+        const maxVol = Number(vehicle.max_vol_m3) || 0;
+        const weightExceeded = orderTotals.weight_kg > maxWeight;
+        const volumeExceeded = orderTotals.volume_m3 > maxVol;
+
+        if (weightExceeded && volumeExceeded) {
+            return {
+                compatible: false,
+                reason: 'Maximum weight and volume exceeded'
+            };
+        }
+        if (weightExceeded) {
+            return {
+                compatible: false,
+                reason: 'Maximum weight exceeded'
+            };
+        }
+        if (volumeExceeded) {
+            return {
+                compatible: false,
+                reason: 'Maximum volume exceeded'
+            };
+        }
+        return {
+            compatible: true,
+            reason: 'Compatible'
+        };
+    }
+
+    function assignVehicleToOrderRoute(orderId, vehicleId) {
+        const job = catalog.find(j => j.id === orderId);
+        if (!job) return false;
+        const approved = getApprovedVehicles();
+        const vehicle = approved.find(v => String(v.id) === String(vehicleId));
+        if (!vehicle) {
+            toast('Only approved vehicles can be selected for a route.');
+            return false;
+        }
+        const totals = getOrderTotals(job);
+        const compat = evaluateVehicleCompatibility(vehicle, totals);
+        if (!compat.compatible) {
+            toast(`Cannot select ${vehicle.model}: ${compat.reason}.`);
+            return false;
+        }
+        const courier = getActiveCourier();
+        const assignments = getRouteAssignments();
+        const record = {
+            order_id: orderId,
+            vehicle_id: vehicle.id,
+            used_by_courier_id: courier.id,
+            used_by_courier_name: courier.name,
+            assigned_at: new Date().toISOString()
+        };
+        assignments[orderId] = record;
+        saveRouteAssignments(assignments);
+        if (state.jobs[orderId]) {
+            state.jobs[orderId].routeAssignment = record;
+            save();
+        }
+        render();
+        toast(`${vehicle.model} (${vehicle.license_plate || vehicle.plate}) selected for route ${orderId} by ${courier.name}.`);
+        return true;
+    }
     const money = value => new Intl.NumberFormat('en-IE', {
         style: 'currency',
         currency: 'EUR'
@@ -284,16 +586,139 @@
         ].join(' ').toLowerCase().includes(query.trim().toLowerCase());
     }
 
+    function renderVehicleSelector(job) {
+        const totals = getOrderTotals(job);
+        const approvedVehicles = getApprovedVehicles();
+        const assignments = getRouteAssignments();
+        const currentAssign = assignments[job.id] || state.jobs[job.id]?.routeAssignment || null;
+        const selectedVehicleId = currentAssign ? String(currentAssign.vehicle_id) : '';
+
+        const productsHtml = (job.products || []).map(p =>
+            `<span class="route-product-pill">${esc(p.name)} (${p.weight_kg} kg · ${p.volume_m3} m³)</span>`
+        ).join('');
+
+        if (!approvedVehicles.length) {
+            return `
+                <div class="route-vehicle-box">
+                    <div class="route-vehicle-header">
+                        <h4>Select vehicle for route (${job.id})</h4>
+                        <span class="route-req-pill">Required: <strong>${totals.weight_kg} kg</strong> · <strong>${totals.volume_m3} m³</strong></span>
+                    </div>
+                    ${productsHtml ? `<div class="route-products-list">${productsHtml}</div>` : ''}
+                    <p class="subtle" style="margin-top: 8px;">No approved vehicles are currently available in the shared pool.</p>
+                </div>
+            `;
+        }
+
+        const optionsHtml = approvedVehicles.map(v => {
+            const compat = evaluateVehicleCompatibility(v, totals);
+            const isSelected = compat.compatible && String(v.id) === selectedVehicleId;
+            const plate = v.license_plate || v.plate || '—';
+            const submitter = resolveSubmitterName(v);
+
+            if (!compat.compatible) {
+                return `
+                    <div class="vehicle-selector-option is-incompatible" aria-disabled="true" title="${esc(compat.reason)}">
+                        <div class="vehicle-option-main">
+                            <div class="vehicle-option-title">
+                                <span class="vehicle-radio-indicator" aria-hidden="true"></span>
+                                <strong>${esc(v.model)}</strong>
+                                <span class="vehicle-plate-tag">${esc(plate)}</span>
+                                <span class="vehicle-type-tag">${esc(v.type_name || 'Vehicle')}</span>
+                            </div>
+                            <span class="compat-badge compat-error">${esc(compat.reason)}</span>
+                        </div>
+                        <div class="vehicle-option-meta">
+                            <span>Capacity: <strong>${v.max_weight_kg} kg</strong> · <strong>${v.max_vol_m3} m³</strong></span>
+                            <span>Order: <strong>${totals.weight_kg} kg</strong> · <strong>${totals.volume_m3} m³</strong></span>
+                            <span>Submitted by: ${esc(submitter)}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <button type="button"
+                        class="vehicle-selector-option ${isSelected ? 'is-selected' : ''}"
+                        data-select-vehicle="${esc(v.id)}"
+                        data-order-id="${esc(job.id)}"
+                        aria-pressed="${isSelected ? 'true' : 'false'}">
+                    <div class="vehicle-option-main">
+                        <div class="vehicle-option-title">
+                            <span class="vehicle-radio-indicator" aria-hidden="true"></span>
+                            <strong>${esc(v.model)}</strong>
+                            <span class="vehicle-plate-tag">${esc(plate)}</span>
+                            <span class="vehicle-type-tag">${esc(v.type_name || 'Vehicle')}</span>
+                        </div>
+                        <span class="compat-badge ${isSelected ? 'compat-selected' : 'compat-ok'}">
+                            ${isSelected ? `✓ Selected for route (${esc(currentAssign.used_by_courier_name || getActiveCourier().name)})` : 'Compatible'}
+                        </span>
+                    </div>
+                    <div class="vehicle-option-meta">
+                        <span>Capacity: <strong>${v.max_weight_kg} kg</strong> · <strong>${v.max_vol_m3} m³</strong></span>
+                        <span>Order: <strong>${totals.weight_kg} kg</strong> · <strong>${totals.volume_m3} m³</strong></span>
+                        <span>Submitted by: ${esc(submitter)}</span>
+                    </div>
+                </button>
+            `;
+        }).join('');
+
+        return `
+            <div class="route-vehicle-box">
+                <div class="route-vehicle-header">
+                    <div>
+                        <h4>Vehicle selection for route · ${esc(job.id)}</h4>
+                        <p class="subtle">Shared approved pool — select a compatible vehicle for this order/route.</p>
+                    </div>
+                    <span class="route-req-pill">Order total: <strong>${totals.weight_kg} kg</strong> · <strong>${totals.volume_m3} m³</strong></span>
+                </div>
+                ${productsHtml ? `<div class="route-products-list">${productsHtml}</div>` : ''}
+                <div class="vehicle-selector-list" role="group" aria-label="Approved vehicles for ${esc(job.id)}">
+                    ${optionsHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderRouteAssignmentSummary(job) {
+        const totals = getOrderTotals(job);
+        const assignments = getRouteAssignments();
+        const currentAssign = assignments[job.id] || state.jobs[job.id]?.routeAssignment || null;
+        if (!currentAssign) return '';
+        const vehicle = getVehicles().find(v => String(v.id) === String(currentAssign.vehicle_id));
+        const model = vehicle ? `${vehicle.model} (${vehicle.license_plate || vehicle.plate})` : currentAssign.vehicle_id;
+        const submitter = vehicle ? resolveSubmitterName(vehicle) : '—';
+        const capInfo = vehicle ? `${vehicle.max_weight_kg} kg · ${vehicle.max_vol_m3} m³` : '—';
+
+        return `
+            <div class="route-vehicle-box route-vehicle-readonly">
+                <div class="route-vehicle-header">
+                    <h4>Assigned route vehicle · ${esc(job.id)}</h4>
+                    <span class="route-req-pill">Order load: <strong>${totals.weight_kg} kg</strong> · <strong>${totals.volume_m3} m³</strong></span>
+                </div>
+                <div class="route-summary-details">
+                    <span><strong>Vehicle:</strong> ${esc(model)} (Cap: ${esc(capInfo)})</span>
+                    <span><strong>Used on route by:</strong> ${esc(currentAssign.used_by_courier_name || 'Courier')}</span>
+                    <span><strong>Originally submitted by:</strong> ${esc(submitter)}</span>
+                </div>
+            </div>
+        `;
+    }
+
     function availableAccordionItem(job, isOpen) {
         const workflow = state.jobs[job.id];
         const windowStr = job.window.replace('Demo window: ', '');
+        const totals = getOrderTotals(job);
+        const assignments = getRouteAssignments();
+        const currentAssign = assignments[job.id] || workflow?.routeAssignment;
+        const assignedVehicle = currentAssign ? getApprovedVehicles().find(v => String(v.id) === String(currentAssign.vehicle_id)) : null;
 
         return `<details class="history-item" data-id="${job.id}" ${isOpen ? 'open' : ''}>
             <summary class="history-summary">
                 <div class="history-summary-left">
                     <span class="history-chevron" aria-hidden="true">▸</span>
                     <strong class="history-id">${job.id}</strong>
-                    <span class="history-item-tag">${esc(job.item)} · ${job.weight} kg · ${job.volume ?? '—'} m³</span>
+                    <span class="history-item-tag">${esc(job.item)} · ${totals.weight_kg} kg · ${totals.volume_m3} m³</span>
                 </div>
                 <div class="history-summary-middle">
                     <span class="history-route-summary">
@@ -303,6 +728,7 @@
                     </span>
                 </div>
                 <div class="history-summary-right">
+                    ${assignedVehicle ? `<span class="route-vehicle-pill">🚚 ${esc(assignedVehicle.model)}</span>` : ''}
                     <span class="fee">${money(job.fee)}</span>
                     <span class="history-date">${windowStr}</span>
                     <span class="order-status status-available">Available</span>
@@ -334,6 +760,8 @@
                     <span class="subtle">${job.window}</span>
                 </div>
 
+                ${renderVehicleSelector(job)}
+
                 <div class="active-action-container">
                     <button class="btn btn-primary detail-action" data-advance="${job.id}" data-expected="available">
                         Accept delivery
@@ -354,6 +782,10 @@
         const workflow = state.jobs[job.id];
         const lastEv = workflow.events.at(-1);
         const eventDateStr = lastEv ? date(lastEv.at) : '';
+        const totals = getOrderTotals(job);
+        const assignments = getRouteAssignments();
+        const currentAssign = assignments[job.id] || workflow?.routeAssignment;
+        const assignedVehicle = currentAssign ? getVehicles().find(v => String(v.id) === String(currentAssign.vehicle_id)) : null;
 
         return `<details class="history-item ${isSelected ? 'selected' : ''}" name="active-deliverable" data-id="${job.id}" ${isOpen ? 'open' : ''}>
             <summary class="history-summary">
@@ -362,13 +794,14 @@
                     <strong class="history-id">${job.id}</strong>
                 </div>
                 <div class="history-summary-right">
+                    ${assignedVehicle ? `<span class="route-vehicle-pill">🚚 ${esc(assignedVehicle.model)}</span>` : ''}
                     <span class="fee">${money(job.fee)}</span>
                     <span class="history-date">${eventDateStr}</span>
                     <span class="order-status status-${workflow.status}">${labels[workflow.status]}</span>
                 </div>
             </summary>
             <div class="history-body">
-                <p class="history-package-meta"><span class="history-item-tag">${esc(job.item)} · ${job.weight} kg · ${job.volume ?? '—'} m³</span></p>
+                <p class="history-package-meta"><span class="history-item-tag">${esc(job.item)} · ${totals.weight_kg} kg · ${totals.volume_m3} m³</span></p>
 
                 <div class="history-stops-grid">
                     <div class="stop">
@@ -394,6 +827,8 @@
                     ${esc(job.note)}<br>
                     <span class="subtle">${job.window}</span>
                 </div>
+
+                ${workflow.status === 'accepted' ? renderVehicleSelector(job) : renderRouteAssignmentSummary(job)}
 
                 <ol class="progress" aria-label="Delivery progress">
                     ${['accepted', 'picked_up', 'delivered'].map(s => `<li class="${workflow.events.some(e => e.status === s) ? 'done' : ''}">${labels[s]}</li>`).join('')}
@@ -421,13 +856,14 @@
         const deliveredEvent = workflow.events.find(e => e.status === 'delivered') || workflow.events.at(-1);
         const deliveredDateStr = deliveredEvent ? date(deliveredEvent.at) : '';
         const hasSig = workflow.signature && workflow.signature.startsWith('data:image/png');
+        const totals = getOrderTotals(job);
 
         return `<details class="history-item" data-id="${job.id}">
             <summary class="history-summary">
                 <div class="history-summary-left">
                     <span class="history-chevron" aria-hidden="true">▸</span>
                     <strong class="history-id">${job.id}</strong>
-                    <span class="history-item-tag">${esc(job.item)} · ${job.weight} kg · ${job.volume ?? '—'} m³</span>
+                    <span class="history-item-tag">${esc(job.item)} · ${totals.weight_kg} kg · ${totals.volume_m3} m³</span>
                 </div>
                 <div class="history-summary-middle">
                     <span class="history-route-summary">
@@ -462,6 +898,7 @@
                         <p class="subtle">GPS: ${job.drop.coords.join(', ')}</p>
                     </div>
                 </div>
+                ${renderRouteAssignmentSummary(job)}
                 <div class="history-details-bottom">
                     <div class="history-timeline-box">
                         <h4>Delivery Timeline</h4>
@@ -908,6 +1345,28 @@
             toast('This delivery has already changed. Review its current status.');
             return;
         }
+
+        // Validate that a compatible approved vehicle has been selected for this route
+        if (expected === 'available' || expected === 'accepted') {
+            const job = catalog.find(j => j.id === id);
+            const assignments = getRouteAssignments();
+            const currentAssign = assignments[id] || workflow.routeAssignment;
+            const approved = getApprovedVehicles();
+            const vehicle = currentAssign ? approved.find(v => String(v.id) === String(currentAssign.vehicle_id)) : null;
+            if (!vehicle) {
+                toast(`Please select a compatible approved vehicle for route ${id} before proceeding.`);
+                return;
+            }
+            if (job) {
+                const compat = evaluateVehicleCompatibility(vehicle, getOrderTotals(job));
+                if (!compat.compatible) {
+                    toast(`Selected vehicle is incompatible with ${id}: ${compat.reason}.`);
+                    return;
+                }
+            }
+            workflow.routeAssignment = currentAssign;
+        }
+
         workflow.status = next[expected];
         if (signature) {
             workflow.signature = signature;
@@ -931,6 +1390,15 @@
         }
     }
     document.addEventListener('click', async event => {
+        const selectVehicleBtn = event.target.closest('[data-select-vehicle]');
+        if (selectVehicleBtn) {
+            const vehicleId = selectVehicleBtn.dataset.selectVehicle;
+            const orderId = selectVehicleBtn.dataset.orderId;
+            if (orderId && vehicleId) {
+                assignVehicleToOrderRoute(orderId, vehicleId);
+            }
+            return;
+        }
         const view = event.target.closest('[data-view]');
         if (view) {
             selected = view.dataset.view;
@@ -954,11 +1422,20 @@
             advance(id, expected);
         }
     });
+    if ($('activeCourierSelect')) {
+        getActiveCourier();
+        $('activeCourierSelect').addEventListener('change', () => {
+            const courier = getActiveCourier();
+            renderLists();
+            toast(`Acting as courier: ${courier.name} (${courier.id}).`);
+        });
+    }
     $('resetDemo').addEventListener('click', async () => {
         if (!(await confirmAction('Reset demo data?',
                 'This replaces only CourierFlow courier demo progress in this browser with the original sample deliveries.',
                 'Reset demo'))) return;
         state = seed();
+        saveRouteAssignments(defaultRouteAssignments());
         selected = 'CF-1044';
         $('storageWarning').hidden = true;
         ['jobSearch', 'historySearch'].forEach(id => {
@@ -995,6 +1472,11 @@
     }
     window.addEventListener('hashchange', nav);
     window.addEventListener('storage', event => {
+        if (event.key === 'cms_vehicles' || event.key === 'cms_route_assignments') {
+            render();
+            toast('Shared vehicle pool updated.');
+            return;
+        }
         if (event.key === KEY || event.key === null) {
             const updated = read();
             if (updated) {

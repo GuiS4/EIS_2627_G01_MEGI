@@ -216,8 +216,174 @@
         toast(message + (canSave ? '' : ' Change kept in this page only.'));
     }
 
+    function defaultSeedVehicles() {
+        return [
+            {
+                id: 'V-001',
+                courier_id: 'CR-001',
+                submitted_by_courier_id: 'CR-001',
+                submitted_by_courier_name: 'Alex Silva',
+                type_name: 'Van',
+                model: 'Renault Kangoo',
+                license_plate: 'AA-12-CF',
+                max_weight_kg: 650,
+                max_vol_m3: 3.3,
+                insurance_expiry_date: '2027-08-15',
+                inspection_expiry_date: '2027-06-20',
+                insurance_expiry_doc: 'kangoo_insurance.pdf',
+                inspection_expiry_doc: 'kangoo_inspection.pdf',
+                approval_status: 'Approved',
+                approved_by: 'Admin (admin@admin.demo)',
+                doc_updated_at: '2026-10-15T10:00:00.000Z',
+                created_at: '2026-10-10T09:00:00.000Z'
+            },
+            {
+                id: 'V-002',
+                courier_id: 'CR-002',
+                submitted_by_courier_id: 'CR-002',
+                submitted_by_courier_name: 'Maria Costa',
+                type_name: 'Van',
+                model: 'Peugeot Partner',
+                license_plate: 'AB-34-CF',
+                max_weight_kg: 750,
+                max_vol_m3: 3.7,
+                insurance_expiry_date: '2027-09-10',
+                inspection_expiry_date: '2027-07-01',
+                insurance_expiry_doc: 'partner_insurance.pdf',
+                inspection_expiry_doc: 'partner_inspection.pdf',
+                approval_status: 'Approved',
+                approved_by: 'Admin (admin@admin.demo)',
+                doc_updated_at: '2026-10-16T11:30:00.000Z',
+                created_at: '2026-10-12T14:20:00.000Z'
+            },
+            {
+                id: 'V-003',
+                courier_id: 'CR-001',
+                submitted_by_courier_id: 'CR-001',
+                submitted_by_courier_name: 'Alex Silva',
+                type_name: 'Motorcycle',
+                model: 'Honda PCX 125',
+                license_plate: 'MC-11-CF',
+                max_weight_kg: 2.0,
+                max_vol_m3: 0.003,
+                insurance_expiry_date: '2027-05-12',
+                inspection_expiry_date: '2027-04-18',
+                insurance_expiry_doc: 'pcx_insurance.pdf',
+                inspection_expiry_doc: 'pcx_inspection.pdf',
+                approval_status: 'Approved',
+                approved_by: 'Admin (admin@admin.demo)',
+                doc_updated_at: '2026-10-18T08:15:00.000Z',
+                created_at: '2026-10-18T08:00:00.000Z'
+            },
+            {
+                id: 'V-004',
+                courier_id: 'CR-002',
+                submitted_by_courier_id: 'CR-002',
+                submitted_by_courier_name: 'Maria Costa',
+                type_name: 'Bicycle',
+                model: 'Urban Cargo Bike',
+                license_plate: 'BK-05-CF',
+                max_weight_kg: 1.0,
+                max_vol_m3: 0.0018,
+                insurance_expiry_date: '2027-11-30',
+                inspection_expiry_date: '2027-11-30',
+                insurance_expiry_doc: 'bike_insurance.pdf',
+                inspection_expiry_doc: 'bike_inspection.pdf',
+                approval_status: 'Approved',
+                approved_by: 'Admin (admin@admin.demo)',
+                doc_updated_at: '2026-10-20T09:45:00.000Z',
+                created_at: '2026-10-19T16:10:00.000Z'
+            },
+            {
+                id: 'V-005',
+                courier_id: 'CR-003',
+                submitted_by_courier_id: 'CR-003',
+                submitted_by_courier_name: 'Daniel Santos',
+                type_name: 'Van',
+                model: 'Citroën Berlingo',
+                license_plate: 'AC-56-CF',
+                max_weight_kg: 650,
+                max_vol_m3: 3.3,
+                insurance_expiry_date: '2027-10-01',
+                inspection_expiry_date: '2027-08-22',
+                insurance_expiry_doc: 'berlingo_insurance.pdf',
+                inspection_expiry_doc: 'berlingo_inspection.pdf',
+                approval_status: 'Pending',
+                approved_by: null,
+                doc_updated_at: '2026-10-25T15:00:00.000Z',
+                created_at: '2026-10-25T15:00:00.000Z'
+            }
+        ];
+    }
+
+    function getSubmittedVehicles() {
+        try {
+            const raw = localStorage.getItem('cms_vehicles');
+            const seededFlag = localStorage.getItem('cms_vehicles_seeded_v2');
+            if (!raw) {
+                const initial = defaultSeedVehicles();
+                localStorage.setItem('cms_vehicles', JSON.stringify(initial));
+                localStorage.setItem('cms_vehicles_seeded_v2', '1');
+                return initial;
+            }
+            const data = JSON.parse(raw);
+            const list = Array.isArray(data) ? data : [];
+            if (!seededFlag) {
+                const defaults = defaultSeedVehicles();
+                const existingPlates = new Set(list.map(v => (v.license_plate || '').toUpperCase()));
+                defaults.forEach(d => {
+                    if (!existingPlates.has(d.license_plate.toUpperCase())) {
+                        list.push(d);
+                    }
+                });
+                localStorage.setItem('cms_vehicles', JSON.stringify(list));
+                localStorage.setItem('cms_vehicles_seeded_v2', '1');
+            }
+            return list;
+        } catch {
+            return defaultSeedVehicles();
+        }
+    }
+
+    function saveSubmittedVehicles(list) {
+        try {
+            localStorage.setItem('cms_vehicles', JSON.stringify(list));
+        } catch {
+            toast('Unable to save vehicle approval status.');
+        }
+    }
+
+    function getRouteAssignments() {
+        try {
+            const data = JSON.parse(localStorage.getItem('cms_route_assignments') || '{}');
+            return data && typeof data === 'object' ? data : {};
+        } catch {
+            return {};
+        }
+    }
+
+    function getCourierSubmitterName(vehicleOrId) {
+        if (vehicleOrId && typeof vehicleOrId === 'object') {
+            if (vehicleOrId.submitted_by_courier_name) return vehicleOrId.submitted_by_courier_name;
+            vehicleOrId = vehicleOrId.submitted_by_courier_id || vehicleOrId.courier_id;
+        }
+        const courierId = vehicleOrId;
+        if (!courierId || courierId === 'demo-courier') return 'Alex Silva';
+        const stateCourier = state.couriers.find(c => c.id === courierId);
+        if (stateCourier) return stateCourier.name;
+        try {
+            const users = JSON.parse(localStorage.getItem('cms_users') || '[]');
+            const found = users.find(u => u.id === courierId);
+            if (found && found.name) return found.name;
+        } catch { /* ignore */ }
+        return courierId;
+    }
+
     // DASHBOARD AND COURIER CARDS
     function renderStats() {
+        const allVehicles = getSubmittedVehicles();
+        const approvedCount = allVehicles.filter(v => v.approval_status === 'Approved').length;
+        const pendingCount = allVehicles.filter(v => v.approval_status === 'Pending').length;
         const data = [
             ['Couriers', state.couriers.length,
                 `${state.couriers.filter(c => c.status === 'available').length} available for assignment`
@@ -227,8 +393,8 @@
             ['Unassigned', state.parcels.filter(p => !p.courierId).length,
                 'Waiting for assignment'
             ],
-            ['Available vehicles', state.vehicles.filter(v => !v.courierId).length,
-                `Fleet: ${state.vehicles.length} vehicles`
+            ['Approved vehicles', approvedCount,
+                `${pendingCount} pending · shared across couriers`
             ]
         ];
         $('stats').innerHTML = data.map(([title, value, note]) =>
@@ -240,19 +406,20 @@
     function renderCouriers() {
         const query = $('courierSearch').value.trim().toLocaleLowerCase('en');
         const filter = $('courierFilter').value;
+        const allVehicles = getSubmittedVehicles();
         const found = state.couriers.filter(c => (filter === 'all' || c.status === filter) && [c.name, c
             .phone, c.email, c.id
         ].join(' ').toLocaleLowerCase('en').includes(query));
         $('courierList').innerHTML = found.map(c => {
-            const car = vehicleFor(c.id);
+            const submittedByCourier = allVehicles.filter(v => (v.submitted_by_courier_id || v.courier_id) === c.id);
             const parcels = activeParcels(c.id);
             const initials = c.name.trim().split(/\s+/).map(w => Array.from(w)[0]).slice(0, 2)
                 .join('');
             return `<article class="courier-card">
                 <div class="courier-heading"><span class="courier-avatar" aria-hidden="true">${esc(initials)}</span><div><h3>${esc(c.name)}</h3><p class="small">${c.id}</p></div>${badge(c.status)}</div>
                 <div class="contact"><a href="tel:${esc(c.phone.replace(/[^+0-9]/g, ''))}">${esc(c.phone)}</a><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></div>
-                <p class="card-label">Assigned vehicle</p>
-                <div class="vehicle-assignment"><div><p><strong>${car ? esc(car.model) : 'No vehicle assigned'}</strong></p><p class="small">${car ? esc(car.plate) : 'Choose an available fleet vehicle'}</p></div><button class="btn btn-outline" data-action="vehicle" data-id="${c.id}" aria-label="Change vehicle for: ${esc(c.name)}">${car ? 'Change' : 'Assign'}</button></div>
+                <p class="card-label">Submitted vehicles · ${submittedByCourier.length}</p>
+                <div class="parcel-chips">${submittedByCourier.length ? submittedByCourier.map(v => `<span class="parcel-chip">${esc(v.model)} (${esc(v.license_plate)}) · ${esc(v.approval_status)}</span>`).join('') : '<p class="small">No vehicles submitted</p>'}</div>
                 <p class="card-label">Active parcels · ${parcels.length}</p>
                 <div class="parcel-chips">${parcels.length ? parcels.map(p => `<a class="parcel-chip" href="#parcel-${p.id}">${p.id} · ${statuses[p.status]}</a>`).join('') : '<p class="small">No active parcels</p>'}</div>
                 <div class="card-actions"><button class="text-button" data-action="edit" data-id="${c.id}" aria-label="Edit courier: ${esc(c.name)}">Edit courier</button><button class="text-button danger" data-action="delete" data-id="${c.id}" aria-label="Delete courier: ${esc(c.name)}">Delete</button></div>
@@ -271,51 +438,25 @@
         </tr>`).join('') || '<tr><td colspan="5">No parcels in this view.</td></tr>';
     }
 
-    function getSubmittedVehicles() {
-        try {
-            const data = JSON.parse(localStorage.getItem('cms_vehicles') || '[]');
-            return Array.isArray(data) ? data : [];
-        } catch {
-            return [];
-        }
-    }
-
-    function saveSubmittedVehicles(list) {
-        try {
-            localStorage.setItem('cms_vehicles', JSON.stringify(list));
-        } catch {
-            toast('Unable to save vehicle approval status.');
-        }
-    }
-
-    function getCourierSubmitterName(courierId) {
-        if (!courierId || courierId === 'demo-courier') return 'Demo Courier';
-        try {
-            const users = JSON.parse(localStorage.getItem('cms_users') || '[]');
-            const found = users.find(u => u.id === courierId);
-            if (found && found.name) return found.name;
-        } catch { /* ignore */ }
-        const stateCourier = state.couriers.find(c => c.id === courierId);
-        return stateCourier ? stateCourier.name : courierId;
-    }
-
-    function renderSubmittedVehicles() {
-        const container = $('submittedVehiclesList');
+    function renderVehicles() {
+        const container = $('vehicleList');
         if (!container) return;
 
         const filter = $('approvalFilter') ? $('approvalFilter').value : 'all';
         const allSubmitted = getSubmittedVehicles();
+        const routeAssignments = getRouteAssignments();
         const filtered = allSubmitted.filter(v => filter === 'all' || v.approval_status === filter);
 
         if (!filtered.length) {
-            container.innerHTML = `<p class="empty-state">${allSubmitted.length ? 'No vehicle registrations match this filter.' : 'No vehicles have been submitted by couriers yet.'}</p>`;
+            container.innerHTML = `<p class="empty-state">${allSubmitted.length ? 'No vehicles match the selected approval status filter.' : 'No vehicles have been submitted by couriers yet.'}</p>`;
             return;
         }
 
         container.innerHTML = filtered.map(v => {
             const statusClass = v.approval_status === 'Approved' ? 'available' :
                 v.approval_status === 'Rejected' ? 'rejected' : 'busy';
-            const submitter = getCourierSubmitterName(v.courier_id);
+            const submitter = getCourierSubmitterName(v);
+            const activeRoutesForVehicle = Object.values(routeAssignments).filter(r => r && r.vehicle_id === v.id);
 
             return `<article class="vehicle-card">
                 <span class="badge badge-${statusClass}">${esc(v.approval_status)}</span>
@@ -332,6 +473,15 @@
                     <div><span>Inspection Doc</span><strong>${esc(v.inspection_expiry_doc)}</strong></div>
                 </div>
 
+                <p class="small" style="margin-top: 8px;">
+                    ${v.approval_status === 'Approved'
+                        ? (activeRoutesForVehicle.length
+                            ? `Shared pool · Used on ${activeRoutesForVehicle.map(r => `${esc(r.order_id)} (${esc(r.used_by_courier_name || 'Courier')})`).join(', ')}`
+                            : 'Shared pool · Available to all couriers for compatible orders')
+                        : v.approval_status === 'Pending'
+                            ? 'Pending admin approval before couriers can select it'
+                            : 'Rejected · Not selectable by couriers'}
+                </p>
                 ${v.approved_by ? `<p class="small">Reviewed by: <strong>${esc(v.approved_by)}</strong></p>` : ''}
 
                 <div class="approval-actions">
@@ -356,35 +506,8 @@
         vehicle.doc_updated_at = new Date().toISOString();
 
         saveSubmittedVehicles(list);
-
-        // If approved, also add to active fleet if not already present
-        if (newStatus === 'Approved') {
-            const existsInFleet = state.vehicles.some(fv => fv.plate.toUpperCase() === vehicle.license_plate.toUpperCase());
-            if (!existsInFleet) {
-                state.vehicles.push({
-                    id: `VH-${vehicle.id}`,
-                    model: vehicle.model,
-                    plate: vehicle.license_plate,
-                    type: `${vehicle.type_name} · ${vehicle.max_weight_kg} kg`,
-                    courierId: null
-                });
-                save(`Vehicle ${vehicle.license_plate} approved and added to fleet.`);
-                return;
-            }
-        }
-
         render();
-        toast(`Vehicle ${vehicle.license_plate} marked as ${newStatus}.`);
-    }
-
-    function renderVehicles() {
-        $('vehicleList').innerHTML = state.vehicles.map(v => `<article class="vehicle-card">
-            <span class="badge badge-${v.courierId ? 'accepted' : 'available'}">${v.courierId ? 'Assigned' : 'Available'}</span>
-            <h3>${esc(v.model)}</h3><span class="plate">${esc(v.plate)}</span><p>${esc(v.type)}</p>
-            <p style="margin-top:12px">${v.courierId ? esc(courierName(v.courierId)) : 'Ready for assignment'}</p>
-            <button class="btn btn-outline" data-action="driver" data-id="${v.id}" aria-label="Change courier for ${esc(v.model)} ${esc(v.plate)}">${v.courierId ? 'Change courier' : 'Assign courier'}</button>
-        </article>`).join('');
-        renderSubmittedVehicles();
+        toast(`Vehicle ${vehicle.license_plate} (${vehicle.model}) ${newStatus.toLowerCase()}.`);
     }
 
     function render() {
@@ -450,47 +573,31 @@
         save(existing ? 'Courier details updated.' : 'New courier added.');
     });
 
-    // VEHICLE AND PARCEL ASSIGNMENTS
+    // PARCEL ASSIGNMENTS
     function assignment(kind, id) {
+        if (kind !== 'parcel') return;
         const form = $('assignmentForm');
         const select = $('assignmentSelect');
         form.elements.namedItem('kind').value = kind;
         form.elements.namedItem('target').value = id;
         $('assignmentError').textContent = '';
-        let options = [],
-            current = '';
-        if (kind === 'vehicle') {
-            const courier = state.couriers.find(c => c.id === id);
-            if (!courier) return;
-            $('assignmentTitle').textContent = 'Assign vehicle';
-            $('assignmentDescription').textContent =
-                `${courier.name} — the selected vehicle will replace the current one. Vehicles assigned to other couriers are unavailable.`;
-            current = vehicleFor(id)?.id || '';
-            options = state.vehicles.map(v => ({
-                id: v.id,
-                label: `${v.model} · ${v.plate}${v.courierId && v.courierId !== id ? ' — assigned to: ' + courierName(v.courierId) : ''}`,
-                disabled: !!v.courierId && v.courierId !== id
-            }));
-        } else {
-            const isParcel = kind === 'parcel';
-            const target = (isParcel ? state.parcels : state.vehicles).find(x => x.id === id);
-            if (!target || (isParcel && target.status === 'delivered')) return;
-            $('assignmentTitle').textContent = isParcel ? 'Assign parcel' :
-                'Assign courier to vehicle';
-            $('assignmentDescription').textContent = isParcel ?
-                `${target.id} · ${target.item}. Unavailable couriers cannot be selected. A picked-up parcel must remain assigned to a courier.` :
-                `${target.model} · ${target.plate}. Couriers who already have another vehicle cannot be selected.`;
-            current = target.courierId || '';
-            options = state.couriers.map(c => ({
-                id: c.id,
-                label: `${c.name}${isParcel ? ' · ' + statuses[c.status] : vehicleFor(c.id) && c.id !== current ? ' — already has a vehicle' : ''}`,
-                disabled: isParcel ? c.status === 'offline' : !!vehicleFor(c.id) && c.id !==
-                    current
-            }));
-        }
-        const parcel = kind === 'parcel' ? state.parcels.find(p => p.id === id) : null;
+
+        const target = state.parcels.find(x => x.id === id);
+        if (!target || target.status === 'delivered') return;
+
+        $('assignmentTitle').textContent = 'Assign parcel';
+        $('assignmentDescription').textContent =
+            `${target.id} · ${target.item}. Unavailable couriers cannot be selected. A picked-up parcel must remain assigned to a courier.`;
+
+        const current = target.courierId || '';
+        const options = state.couriers.map(c => ({
+            id: c.id,
+            label: `${c.name} · ${statuses[c.status]}`,
+            disabled: c.status === 'offline'
+        }));
+
         select.innerHTML =
-            `<option value="" ${parcel?.status === 'picked_up' ? 'disabled' : ''}>${kind === 'vehicle' ? 'No vehicle' : 'Unassigned'}</option>` +
+            `<option value="" ${target.status === 'picked_up' ? 'disabled' : ''}>Unassigned</option>` +
             options.map(o =>
                 `<option value="${o.id}" ${o.disabled ? 'disabled' : ''}>${esc(o.label)}</option>`).join(
                 '');
@@ -508,26 +615,7 @@
         const error = message => {
             $('assignmentError').textContent = message;
         };
-        if (kind === 'vehicle') {
-            if (!state.couriers.some(c => c.id === target)) return error('Courier not found.');
-            const car = state.vehicles.find(v => v.id === selection);
-            if (selection && !car) return error('Selected vehicle not found.');
-            if (car?.courierId && car.courierId !== target) return error(
-                'This vehicle is already assigned to another courier.');
-            state.vehicles.filter(v => v.courierId === target).forEach(v => {
-                v.courierId = null;
-            });
-            if (car) car.courierId = target;
-        } else if (kind === 'driver') {
-            const car = state.vehicles.find(v => v.id === target);
-            if (!car) return error('Vehicle not found.');
-            if (selection && !state.couriers.some(c => c.id === selection)) return error(
-                'Courier not found.');
-            const currentCar = vehicleFor(selection);
-            if (currentCar && currentCar.id !== target) return error(
-                'This courier already has another vehicle. Release that vehicle first.');
-            car.courierId = selection || null;
-        } else if (kind === 'parcel') {
+        if (kind === 'parcel') {
             const parcel = state.parcels.find(p => p.id === target);
             if (!parcel || parcel.status === 'delivered') return error(
                 'This parcel cannot be changed.');
@@ -566,13 +654,10 @@
             return;
         }
         if (!await confirmAction('Delete courier?',
-                `${courier.name} will be deleted and their vehicle will become available.`)) return;
+                `${courier.name} will be deleted from the courier directory.`)) return;
         if (state.parcels.some(p => p.courierId === id)) return toast(
             'Assignments have changed. Review the courier’s parcels.');
         state.couriers = state.couriers.filter(c => c.id !== id);
-        state.vehicles.filter(v => v.courierId === id).forEach(v => {
-            v.courierId = null;
-        });
         save('Courier deleted.');
     }
 
@@ -595,17 +680,22 @@
     $('courierSearch').addEventListener('input', renderCouriers);
     $('courierFilter').addEventListener('change', renderCouriers);
     $('parcelFilter').addEventListener('change', renderParcels);
-    if ($('approvalFilter')) $('approvalFilter').addEventListener('change', renderSubmittedVehicles);
+    if ($('approvalFilter')) $('approvalFilter').addEventListener('change', renderVehicles);
     $('resetDemo').addEventListener('click', async () => {
         if (!await confirmAction('Reset demo data?',
-                'Couriers, parcel assignments and vehicle assignments in the admin dashboard will return to their initial values. The courier dashboard will not be affected.'
+                'Couriers, parcel assignments and vehicle registrations in the admin dashboard will return to their initial values.'
             )) return;
         state = seed();
+        try {
+            localStorage.setItem('cms_vehicles', JSON.stringify(defaultSeedVehicles()));
+            localStorage.setItem('cms_vehicles_seeded_v2', 'true');
+        } catch (_) {}
         canSave = true;
         $('storageWarning').hidden = true;
         $('courierSearch').value = '';
         $('courierFilter').value = 'all';
         $('parcelFilter').value = 'all';
+        if ($('approvalFilter')) $('approvalFilter').value = 'all';
         save('Demo data restored.');
     });
 
@@ -626,9 +716,9 @@
     }
     window.addEventListener('hashchange', nav);
     window.addEventListener('storage', event => {
-        if (event.key === 'cms_vehicles') {
-            renderSubmittedVehicles();
-            toast('Vehicle registrations updated.');
+        if (event.key === 'cms_vehicles' || event.key === 'cms_route_assignments') {
+            render();
+            toast('Vehicle pool or route assignments updated.');
             return;
         }
         if (event.key !== KEY && event.key !== null) return;

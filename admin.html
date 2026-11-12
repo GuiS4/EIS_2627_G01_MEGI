@@ -275,39 +275,24 @@
                         <h2>Vehicles</h2>
 
                         <p class="description">
-                            One vehicle, one courier. See current assignments at a glance.
+                            Review courier vehicle submissions and approve vehicles to make them available to all couriers.
                         </p>
 
                     </div>
 
+                    <label>
+                        Approval status
+                        <select id="approvalFilter">
+                            <option value="all">All vehicles</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </label>
+
                 </div>
 
                 <div id="vehicleList" class="vehicle-grid"></div>
-
-                <!-- COURIER SUBMITTED VEHICLES (APPROVALS) -->
-                <div class="submitted-vehicles-section">
-                    <div class="section-heading" style="margin-top: 36px;">
-                        <div>
-                            <p class="tag">DOCUMENTATION REVIEW</p>
-                            <h2>Courier Vehicle Registrations</h2>
-                            <p class="description">
-                                Review and approve or reject vehicles registered by couriers.
-                            </p>
-                        </div>
-
-                        <label>
-                            Approval status
-                            <select id="approvalFilter">
-                                <option value="all">All registrations</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Approved">Approved</option>
-                                <option value="Rejected">Rejected</option>
-                            </select>
-                        </label>
-                    </div>
-
-                    <div id="submittedVehiclesList" class="vehicle-grid"></div>
-                </div>
 
             </section>
 

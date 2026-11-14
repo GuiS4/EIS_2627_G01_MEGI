@@ -20,31 +20,8 @@
     const PROFILE_KEY = 'courierflow.admin.profile.v1';
     const $ = id => document.getElementById(id);
 
-    const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-    }[ch]));
-
-    const money = value => new Intl.NumberFormat('en-IE', {
-        style: 'currency',
-        currency: 'EUR'
-    }).format(value);
-
-    const formatDateDDMMYYYY = value => {
-        if (!value) return '—';
-        const str = String(value).trim();
-        const isoMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(str);
-        if (isoMatch) {
-            return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
-        }
-        const dt = new Date(str);
-        if (!Number.isFinite(dt.getTime())) return str;
-        const pad = n => String(n).padStart(2, '0');
-        return `${pad(dt.getDate())}/${pad(dt.getMonth() + 1)}/${dt.getFullYear()}`;
-    };
+    const esc = value => escapeHtml(value);
+    const money = value => formatCurrencyEUR(value);
 
     const approvalBadge = status => {
         const cls = status === 'Approved' ? 'available' : status === 'Rejected' ? 'rejected' : 'busy';
@@ -52,20 +29,19 @@
     };
 
     const routeStatusLabels = {
-        available: 'Available / Unassigned',
-        unassigned: 'Available / Unassigned',
-        accepted: 'Accepted (Route Prepared)',
-        picked_up: 'Picked up (In Transit)',
-        delivered: 'Delivered (Completed)'
+        'Initiated': 'Initiated',
+        'In Progress': 'In Progress',
+        'Completed': 'Completed',
+        'Cancelled': 'Cancelled'
     };
 
     const routeBadge = status => {
-        const cls = status === 'delivered'
+        const cls = status === 'Completed'
             ? 'delivered'
-            : status === 'picked_up'
+            : status === 'In Progress'
                 ? 'picked_up'
-                : status === 'accepted'
-                    ? 'accepted'
+                : status === 'Cancelled'
+                    ? 'rejected'
                     : 'unassigned';
         return `<span class="badge badge-${cls}">${esc(routeStatusLabels[status] || status)}</span>`;
     };
@@ -267,15 +243,6 @@
     // =========================================================================
     // CROSS-SYSTEM DATA AGGREGATION FOR OPERATIONAL KPIS & ANALYTICS
     // =========================================================================
-    const BASE_CATALOG = [
-        { id: 'CF-1041', item: 'Documents', pickup: 'Praça da Liberdade, Porto', drop: 'Praça da Ribeira, Porto', fee: 7.50, defaultStatus: 'available', defaultCourier: 'Unassigned' },
-        { id: 'CF-1042', item: 'Clothing', pickup: 'Rua de Santa Catarina, Porto', drop: 'Rua de Dom Manuel II, Porto', fee: 9.20, defaultStatus: 'available', defaultCourier: 'Alex Silva' },
-        { id: 'CF-1043', item: 'Electronics', pickup: 'Praça de Mouzinho de Albuquerque, Porto', drop: 'Avenida dos Aliados, Porto', fee: 12.80, defaultStatus: 'available', defaultCourier: 'Unassigned' },
-        { id: 'CF-1044', item: 'Books', pickup: 'Rua das Carmelitas, Porto', drop: 'Campo 24 de Agosto, Porto', fee: 8.60, defaultStatus: 'accepted', defaultCourier: 'Alex Silva' },
-        { id: 'CF-1039', item: 'Art supplies', pickup: 'Rua de Cedofeita, Porto', drop: 'Rua de Miguel Bombarda, Porto', fee: 8.40, defaultStatus: 'picked_up', defaultCourier: 'Maria Costa' },
-        { id: 'CF-1036', item: 'Documents', pickup: 'Rua de Júlio Dinis, Porto', drop: 'Praça da Trindade, Porto', fee: 6.50, defaultStatus: 'delivered', defaultCourier: 'Daniel Santos' }
-    ];
-
     function gatherSystemMetrics() {
         // 1. Users & Roles
         let registeredUsers = [];
@@ -283,7 +250,6 @@
             registeredUsers = JSON.parse(localStorage.getItem('cms_users') || '[]');
         } catch { /* ignore */ }
 
-        // Couriers from Staff store (or fallback seed count of 5)
         let couriers = [
             { id: 'CR-001', name: 'Alex Silva', approval_status: 'Approved', status: 'busy' },
             { id: 'CR-002', name: 'Maria Costa', approval_status: 'Approved', status: 'busy' },
@@ -299,7 +265,7 @@
         } catch { /* ignore */ }
 
         const regClients = registeredUsers.filter(u => u && u.role === 'client');
-        const baselineClients = 18; // Demo baseline active clients in Porto
+        const baselineClients = 18;
         const totalClients = baselineClients + regClients.length;
 
         const approvedCouriers = couriers.filter(c => (c.approval_status || 'Approved') === 'Approved').length;
@@ -308,27 +274,14 @@
         const approvedStaff = state.staff.filter(s => s.approval_status === 'Approved').length;
         const pendingStaff = state.staff.filter(s => s.approval_status === 'Pending').length;
 
-        // 2. Vehicles & Fleet
-        let vehicles = [];
-        try {
-            vehicles = JSON.parse(localStorage.getItem('cms_vehicles') || '[]');
-        } catch { /* ignore */ }
-        const totalVehicles = vehicles.length || 6;
-        const approvedVehicles = vehicles.length
-            ? vehicles.filter(v => v.approval_status === 'Approved').length
-            : 4;
+        // 2. Vehicles & Fleet (from shared cms_vehicles)
+        const vehicles = getSharedVehicles();
+        const totalVehicles = vehicles.length;
+        const approvedVehicles = vehicles.filter(v => v.approval_status === 'Approved').length;
+        const vehicleMap = new Map(vehicles.map(v => [String(v.id), `${v.model} (${v.license_plate})`]));
 
-        // 3. Routes / Orders & Route Assignments
-        let courierWorkflow = null;
-        try {
-            courierWorkflow = JSON.parse(localStorage.getItem('courierflow.courier.demo.v1') || 'null');
-        } catch { /* ignore */ }
-
-        let routeAssignments = {
-            'CF-1044': { order_id: 'CF-1044', vehicle_id: 'V-001', used_by_courier_name: 'Alex Silva' },
-            'CF-1039': { order_id: 'CF-1039', vehicle_id: 'V-002', used_by_courier_name: 'Maria Costa' },
-            'CF-1036': { order_id: 'CF-1036', vehicle_id: 'V-001', used_by_courier_name: 'Daniel Santos' }
-        };
+        // 3. Shared Orders & Route Assignments (from shared cms_orders & cms_route_assignments)
+        let routeAssignments = defaultRouteAssignments();
         try {
             const raRaw = JSON.parse(localStorage.getItem('cms_route_assignments') || 'null');
             if (raRaw && typeof raRaw === 'object') {
@@ -336,59 +289,36 @@
             }
         } catch { /* ignore */ }
 
-        const vehicleMap = new Map(vehicles.map(v => [String(v.id), `${v.model} (${v.license_plate})`]));
-        if (!vehicleMap.size) {
-            vehicleMap.set('V-001', 'Renault Kangoo (AA-12-CF)');
-            vehicleMap.set('V-002', 'Peugeot Partner (AB-34-CF)');
-            vehicleMap.set('V-003', 'Honda PCX 125 (MC-11-CF)');
-            vehicleMap.set('V-004', 'Urban Cargo Bike (BK-05-CF)');
-        }
-
-        const routes = BASE_CATALOG.map(entry => {
-            const liveStatus = courierWorkflow?.jobs?.[entry.id]?.status || entry.defaultStatus;
-            const rAssign = routeAssignments[entry.id] || courierWorkflow?.jobs?.[entry.id]?.routeAssignment || null;
-            const courierLabel = rAssign?.used_by_courier_name || (liveStatus === 'available' ? 'Unassigned' : entry.defaultCourier);
+        const sharedOrders = getSharedOrders();
+        const routes = sharedOrders.map(o => {
+            const rAssign = routeAssignments[o.id] || o.routeAssignment || null;
+            const courierLabel = rAssign?.used_by_courier_name || (o.status === 'Initiated' ? 'Unassigned' : 'Courier');
             const vehicleLabel = rAssign?.vehicle_id ? (vehicleMap.get(String(rAssign.vehicle_id)) || rAssign.vehicle_id) : 'Not selected yet';
+            const hadCancellation = (o.events || []).some(e => e.status === 'Cancelled') || o.status === 'Cancelled';
+            const attemptNum = Math.max(1, parseInt(o.attempt, 10) || 1);
             return {
-                id: entry.id,
-                item: entry.item,
-                route: `${entry.pickup} → ${entry.drop}`,
-                pickup: entry.pickup,
-                drop: entry.drop,
-                status: liveStatus,
+                id: o.id,
+                item: `${o.item || 'Order'} · Attempt #${attemptNum}`,
+                route: `${o.pickup?.address || 'Porto'} → ${o.drop?.address || 'Porto'}`,
+                pickup: o.pickup?.address || 'Porto',
+                drop: o.drop?.address || 'Porto',
+                status: o.status,
+                hadCancellation,
                 courier: courierLabel,
                 vehicle: vehicleLabel,
-                fee: entry.fee
+                fee: Number(o.fee) || 0
             };
         });
 
-        // Also include any client-created orders from cms_orders
-        try {
-            const clientOrders = JSON.parse(localStorage.getItem('cms_orders') || '[]');
-            clientOrders.forEach(o => {
-                routes.push({
-                    id: o.code || `ORD-${String(o.id).slice(0, 5)}`,
-                    item: `${(o.products || []).length || 1} product(s)`,
-                    route: `${o.origin || 'Porto'} → ${o.destination || 'Porto'}`,
-                    pickup: o.origin || 'Porto',
-                    drop: o.destination || 'Porto',
-                    status: (o.status || '').toLowerCase() === 'delivered' ? 'delivered' : 'available',
-                    courier: 'Assigned via dispatch',
-                    vehicle: 'Shared pool',
-                    fee: 9.50
-                });
-            });
-        } catch { /* ignore */ }
-
         const routeCounts = {
-            available: routes.filter(r => r.status === 'available' || r.status === 'unassigned').length,
-            accepted: routes.filter(r => r.status === 'accepted').length,
-            picked_up: routes.filter(r => r.status === 'picked_up').length,
-            delivered: routes.filter(r => r.status === 'delivered').length
+            initiated: routes.filter(r => r.status === 'Initiated').length,
+            in_progress: routes.filter(r => r.status === 'In Progress').length,
+            completed: routes.filter(r => r.status === 'Completed').length,
+            cancelled: routes.filter(r => r.status === 'Cancelled' || r.hadCancellation).length
         };
 
         const totalRevenue = routes.reduce((sum, r) => sum + (Number(r.fee) || 0), 0);
-        const completedRevenue = routes.filter(r => r.status === 'delivered').reduce((sum, r) => sum + (Number(r.fee) || 0), 0);
+        const completedRevenue = routes.filter(r => r.status === 'Completed').reduce((sum, r) => sum + (Number(r.fee) || 0), 0);
 
         return {
             couriersCount: couriers.length,
@@ -437,7 +367,7 @@
             ['Total Staff Members', m.staffCount, `${m.approvedStaff} approved · ${m.pendingStaff} pending review`],
             ['Total Couriers', m.couriersCount, `${m.approvedCouriers} approved · ${m.pendingCouriers} pending Staff review`],
             ['Total Clients', m.totalClients, `${m.regClientsCount} newly registered in browser`],
-            ['Total Routes & Orders', m.routes.length, `${m.routeCounts.accepted + m.routeCounts.picked_up} active · ${m.routeCounts.delivered} completed`]
+            ['Total Routes & Orders', m.routes.length, `${m.routeCounts.in_progress} In Progress · ${m.routeCounts.completed} Completed`]
         ];
 
         $('stats').innerHTML = primaryKpis.map(([title, value, note]) =>
@@ -446,11 +376,11 @@
 
         if ($('operationalStats')) {
             const completionRate = m.routes.length
-                ? Math.round((m.routeCounts.delivered / m.routes.length) * 100)
+                ? Math.round((m.routeCounts.completed / m.routes.length) * 100)
                 : 0;
             const secondaryKpis = [
                 ['Pending Staff Approvals', m.pendingStaff, m.pendingStaff ? 'Awaiting Admin governance decision' : 'All Staff accounts reviewed'],
-                ['Routes In Progress', m.routeCounts.accepted + m.routeCounts.picked_up, `${m.routeCounts.accepted} accepted · ${m.routeCounts.picked_up} picked up`],
+                ['Routes In Progress', m.routeCounts.in_progress, `${m.routeCounts.initiated} Initiated · ${m.routeCounts.cancelled} Cancelled attempts`],
                 ['Shared Fleet Pool', `${m.approvedVehicles}/${m.totalVehicles}`, 'Approved vehicles available to couriers'],
                 ['Platform Route Volume', money(m.totalRevenue), `${money(m.completedRevenue)} completed · ${completionRate}% completion rate`]
             ];
@@ -466,10 +396,10 @@
         // Render Route Status Bars
         const totalRoutes = Math.max(1, m.routes.length);
         const routeBars = [
-            { label: 'Available / Unassigned', count: m.routeCounts.available, pct: Math.round((m.routeCounts.available / totalRoutes) * 100), color: '#64748b' },
-            { label: 'Accepted (Route Prepared)', count: m.routeCounts.accepted, pct: Math.round((m.routeCounts.accepted / totalRoutes) * 100), color: '#2563eb' },
-            { label: 'Picked Up (In Transit)', count: m.routeCounts.picked_up, pct: Math.round((m.routeCounts.picked_up / totalRoutes) * 100), color: '#d97706' },
-            { label: 'Delivered (Completed)', count: m.routeCounts.delivered, pct: Math.round((m.routeCounts.delivered / totalRoutes) * 100), color: '#16a34a' }
+            { label: 'Initiated (Waiting)', count: m.routeCounts.initiated, pct: Math.round((m.routeCounts.initiated / totalRoutes) * 100), color: '#64748b' },
+            { label: 'In Progress (Active Route)', count: m.routeCounts.in_progress, pct: Math.round((m.routeCounts.in_progress / totalRoutes) * 100), color: '#d97706' },
+            { label: 'Completed (Delivered)', count: m.routeCounts.completed, pct: Math.round((m.routeCounts.completed / totalRoutes) * 100), color: '#16a34a' },
+            { label: 'Cancelled / Retried Attempts', count: m.routeCounts.cancelled, pct: Math.round((m.routeCounts.cancelled / totalRoutes) * 100), color: '#dc2626' }
         ];
 
         if ($('routeAnalyticsBars')) {

@@ -590,6 +590,12 @@ select {
     border: 1px solid #bbf7d0;
 }
 
+.status-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
 .empty-state {
     grid-column: 1/-1;
     padding: 30px;

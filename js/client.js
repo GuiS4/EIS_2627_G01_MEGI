@@ -42,28 +42,18 @@
     }[ch]));
 
     // =====================================
-    // STORAGE
+    // STORAGE (uses shared stores in main.js)
     // =====================================
 
-    function loadList(key) {
-        try {
-            const data = JSON.parse(localStorage.getItem(key) || "[]");
-            return Array.isArray(data) ? data : [];
-        } catch {
-            return [];
-        }
-    }
-
-    let products = loadList(PRODUCTS_KEY);
-    let orders = loadList(ORDERS_KEY);
+    let products = getSharedProducts();
+    let orders = getSharedOrders();
 
     function saveData() {
-        try {
-            localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
-            localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-        } catch {
+        if (!saveSharedProducts(products) || !saveSharedOrders(orders)) {
             toast("Unable to save data in this browser.");
         }
+        products = getSharedProducts();
+        orders = getSharedOrders();
     }
 
     // =====================================
@@ -108,8 +98,8 @@
 
     function totalsOf(list) {
         return list.reduce((sum, p) => ({
-            weight: sum.weight + (Number(p.weight) || 0),
-            volume: sum.volume + (Number(p.volume) || 0)
+            weight: sum.weight + (Number(p.weight_kg ?? p.weight) || 0),
+            volume: sum.volume + (Number(p.volume_m3 ?? p.volume) || 0)
         }), { weight: 0, volume: 0 });
     }
 
@@ -178,13 +168,17 @@
 
         if (!valid) return;
 
+        const nowIso = new Date().toISOString();
         products.push({
             id: crypto.randomUUID(),
             description,
             category,
+            weight_kg: weight,
+            volume_m3: volume,
             weight,
             volume,
-            createdAt: new Date().toISOString()
+            created_at: nowIso,
+            createdAt: nowIso
         });
 
         saveData();
@@ -542,22 +536,33 @@
 
         if (selectedIds.length === 0 || !coordinates) return;
 
-        const order = {
-            id: "CMS-" + crypto.randomUUID().slice(0, 8).toUpperCase(),
-            products: products.filter(p => selectedIds.includes(p.id)),
+        const nowIso = new Date().toISOString();
+        const selectedProducts = products.filter(p => selectedIds.includes(p.id));
+        const order = normalizeOrder({
+            id: "CF-" + Math.floor(1050 + Math.random() * 8900),
+            products: selectedProducts,
+            origin_lat: coordinates.origin[0],
+            origin_long: coordinates.origin[1],
+            dest_lat: coordinates.destination[0],
+            dest_long: coordinates.destination[1],
             origin: coordinates.origin,
             destination: coordinates.destination,
             status: "Initiated",
-            createdAt: new Date().toISOString()
-        };
+            attempt: 1,
+            created_at: nowIso,
+            createdAt: nowIso,
+            events: [
+                { status: "Initiated", at: nowIso, attempt: 1 }
+            ]
+        });
 
-        orders.push(order);
+        orders.unshift(order);
         saveData();
 
         resetOrderForm();
         renderOrders();
         renderStats();
-        toast(`Order ${order.id} created.`);
+        toast(`Order ${order.id} created (status: Initiated) and sent to Courier pool.`);
         location.hash = "#orders";
     });
 
@@ -570,6 +575,9 @@
         const totals = totalsOf(items);
         const count = items.length;
         const statusClass = STATUS_CLASS[order.status] || "status-available";
+        const attemptNum = order.attempt || 1;
+        const wasCancelled = Array.isArray(order.events) && order.events.some(e => e.status === "Cancelled");
+        const hasSig = order.signature && String(order.signature).startsWith("data:image/");
 
         return `<details class="history-item" name="client-order" data-id="${esc(order.id)}">
             <summary class="history-summary">
@@ -579,8 +587,11 @@
                     <span class="history-item-tag">${count} product${count === 1 ? "" : "s"} · ${formatNumber(totals.weight)} kg · ${formatNumber(totals.volume)} m³</span>
                 </div>
                 <div class="history-summary-right">
-                    <span class="history-date">${esc(formatDate(order.createdAt))}</span>
+                    <span class="history-item-tag">Attempt #${attemptNum}</span>
+                    ${wasCancelled && order.status === "Initiated" ? '<span class="order-status status-cancelled">Returned after cancellation</span>' : ''}
+                    <span class="history-date">${esc(formatDate(order.created_at || order.createdAt))}</span>
                     <span class="order-status ${statusClass}">${esc(order.status)}</span>
+                    ${hasSig ? '<span class="pod-pill">✍ e-POD</span>' : ''}
                 </div>
             </summary>
             <div class="history-body">
@@ -588,26 +599,33 @@
                     <div class="stop">
                         <span class="stop-letter">A</span>
                         <h4>Pick up from</h4>
-                        <p class="subtle">GPS: ${esc(formatCoords(order.origin))}</p>
+                        ${order.pickup?.address ? `<p>${esc(order.pickup.address)}</p>` : ""}
+                        <p class="subtle">GPS: ${esc(order.origin_lat ?? order.origin?.[0])}, ${esc(order.origin_long ?? order.origin?.[1])}</p>
                     </div>
                     <div class="stop drop">
                         <span class="stop-letter">B</span>
                         <h4>Deliver to</h4>
-                        <p class="subtle">GPS: ${esc(formatCoords(order.destination))}</p>
+                        ${order.drop?.address ? `<p>${esc(order.drop.address)}</p>` : ""}
+                        <p class="subtle">GPS: ${esc(order.dest_lat ?? order.destination?.[0])}, ${esc(order.dest_long ?? order.destination?.[1])}</p>
                     </div>
                 </div>
                 <div>
                     <h4>Products</h4>
                     <ul class="client-order-products">
-                        ${items.map(p => `<li><strong>${esc(p.description)}</strong> <span>${esc(CATEGORY_LABELS[p.category] || "Other")} · ${formatNumber(p.weight)} kg · ${formatNumber(p.volume)} m³</span></li>`).join("")}
+                        ${items.map(p => `<li><strong>${esc(p.description)}</strong> <span>${esc(CATEGORY_LABELS[p.category] || "Other")} · ${formatNumber(p.weight_kg ?? p.weight)} kg · ${formatNumber(p.volume_m3 ?? p.volume)} m³</span></li>`).join("")}
                     </ul>
                 </div>
+                ${hasSig ? `
+                <div class="proof-card history-pod-box" style="margin-top: 12px;">
+                    <h4>Electronic Proof of Delivery (e-POD)</h4>
+                    <img src="${order.signature}" alt="Proof of delivery for ${esc(order.id)}" class="signature-preview-img">
+                </div>` : ""}
             </div>
         </details>`;
     }
 
     function renderOrders() {
-        const newestFirst = (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt);
+        const newestFirst = (a, b) => Date.parse(b.created_at || b.createdAt) - Date.parse(a.created_at || a.createdAt);
 
         const active = orders.filter(o => ACTIVE_STATUSES.includes(o.status)).sort(newestFirst);
         const history = orders.filter(o => HISTORY_STATUSES.includes(o.status)).sort(newestFirst);
@@ -661,8 +679,8 @@
 
     window.addEventListener("storage", event => {
         if (event.key === PRODUCTS_KEY || event.key === ORDERS_KEY || event.key === null) {
-            products = loadList(PRODUCTS_KEY);
-            orders = loadList(ORDERS_KEY);
+            products = getSharedProducts();
+            orders = getSharedOrders();
             renderProducts();
             renderOrders();
             renderStats();

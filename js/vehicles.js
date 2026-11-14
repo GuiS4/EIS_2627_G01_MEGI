@@ -48,106 +48,6 @@ const activeCourier = getActiveCourierIdentity();
 const courierId = activeCourier.id;
 const courierName = activeCourier.name;
 
-function defaultSeedVehicles() {
-    return [
-        {
-            id: "V-001",
-            courier_id: "CR-001",
-            submitted_by_courier_id: "CR-001",
-            submitted_by_courier_name: "Alex Silva",
-            type_name: "Van",
-            model: "Renault Kangoo",
-            license_plate: "AA-12-CF",
-            max_weight_kg: 650,
-            max_vol_m3: 3.3,
-            insurance_expiry_date: "2027-08-15",
-            inspection_expiry_date: "2027-06-20",
-            insurance_expiry_doc: "kangoo_insurance.pdf",
-            inspection_expiry_doc: "kangoo_inspection.pdf",
-            approval_status: "Approved",
-            approved_by: "Admin (admin@admin.demo)",
-            doc_updated_at: "2026-10-15T10:00:00.000Z",
-            created_at: "2026-10-10T09:00:00.000Z"
-        },
-        {
-            id: "V-002",
-            courier_id: "CR-002",
-            submitted_by_courier_id: "CR-002",
-            submitted_by_courier_name: "Maria Costa",
-            type_name: "Van",
-            model: "Peugeot Partner",
-            license_plate: "AB-34-CF",
-            max_weight_kg: 750,
-            max_vol_m3: 3.7,
-            insurance_expiry_date: "2027-09-10",
-            inspection_expiry_date: "2027-07-01",
-            insurance_expiry_doc: "partner_insurance.pdf",
-            inspection_expiry_doc: "partner_inspection.pdf",
-            approval_status: "Approved",
-            approved_by: "Admin (admin@admin.demo)",
-            doc_updated_at: "2026-10-16T11:30:00.000Z",
-            created_at: "2026-10-12T14:20:00.000Z"
-        },
-        {
-            id: "V-003",
-            courier_id: "CR-001",
-            submitted_by_courier_id: "CR-001",
-            submitted_by_courier_name: "Alex Silva",
-            type_name: "Motorcycle",
-            model: "Honda PCX 125",
-            license_plate: "MC-11-CF",
-            max_weight_kg: 2.0,
-            max_vol_m3: 0.003,
-            insurance_expiry_date: "2027-05-12",
-            inspection_expiry_date: "2027-04-18",
-            insurance_expiry_doc: "pcx_insurance.pdf",
-            inspection_expiry_doc: "pcx_inspection.pdf",
-            approval_status: "Approved",
-            approved_by: "Admin (admin@admin.demo)",
-            doc_updated_at: "2026-10-18T08:15:00.000Z",
-            created_at: "2026-10-18T08:00:00.000Z"
-        },
-        {
-            id: "V-004",
-            courier_id: "CR-002",
-            submitted_by_courier_id: "CR-002",
-            submitted_by_courier_name: "Maria Costa",
-            type_name: "Bicycle",
-            model: "Urban Cargo Bike",
-            license_plate: "BK-05-CF",
-            max_weight_kg: 1.0,
-            max_vol_m3: 0.0018,
-            insurance_expiry_date: "2027-11-30",
-            inspection_expiry_date: "2027-11-30",
-            insurance_expiry_doc: "bike_insurance.pdf",
-            inspection_expiry_doc: "bike_inspection.pdf",
-            approval_status: "Approved",
-            approved_by: "Admin (admin@admin.demo)",
-            doc_updated_at: "2026-10-20T09:45:00.000Z",
-            created_at: "2026-10-19T16:10:00.000Z"
-        },
-        {
-            id: "V-005",
-            courier_id: "CR-003",
-            submitted_by_courier_id: "CR-003",
-            submitted_by_courier_name: "Daniel Santos",
-            type_name: "Van",
-            model: "Citroën Berlingo",
-            license_plate: "AC-56-CF",
-            max_weight_kg: 650,
-            max_vol_m3: 3.3,
-            insurance_expiry_date: "2027-10-01",
-            inspection_expiry_date: "2027-08-22",
-            insurance_expiry_doc: "berlingo_insurance.pdf",
-            inspection_expiry_doc: "berlingo_inspection.pdf",
-            approval_status: "Pending",
-            approved_by: null,
-            doc_updated_at: "2026-10-25T15:00:00.000Z",
-            created_at: "2026-10-25T15:00:00.000Z"
-        }
-    ];
-}
-
 function resolveSubmitterName(vehicle) {
     if (vehicle.submitted_by_courier_name) return vehicle.submitted_by_courier_name;
     const subId = vehicle.submitted_by_courier_id || vehicle.courier_id;
@@ -170,43 +70,15 @@ function isSubmittedByCurrentCourier(vehicle) {
 }
 
 // =====================================
-// STORAGE
+// STORAGE (delegates to shared store in main.js)
 // =====================================
 
 function getVehicles() {
-    try {
-        const raw = localStorage.getItem(VEHICLE_KEY);
-        const seededFlag = localStorage.getItem("cms_vehicles_seeded_v2");
-        if (!raw) {
-            const initial = defaultSeedVehicles();
-            localStorage.setItem(VEHICLE_KEY, JSON.stringify(initial));
-            localStorage.setItem("cms_vehicles_seeded_v2", "1");
-            return initial;
-        }
-        const data = JSON.parse(raw);
-        const list = Array.isArray(data) ? data : [];
-        if (!seededFlag) {
-            const defaults = defaultSeedVehicles();
-            const existingPlates = new Set(list.map(v => (v.license_plate || "").toUpperCase()));
-            defaults.forEach(d => {
-                if (!existingPlates.has(d.license_plate.toUpperCase())) {
-                    list.push(d);
-                }
-            });
-            localStorage.setItem(VEHICLE_KEY, JSON.stringify(list));
-            localStorage.setItem("cms_vehicles_seeded_v2", "1");
-        }
-        return list;
-    } catch {
-        return defaultSeedVehicles();
-    }
+    return getSharedVehicles();
 }
 
 function saveVehicles(vehicles) {
-    localStorage.setItem(
-        VEHICLE_KEY,
-        JSON.stringify(vehicles)
-    );
+    saveSharedVehicles(vehicles);
 }
 
 // =====================================
@@ -624,29 +496,20 @@ function renderVehicles() {
 // SIDEBAR COUNTS & DEMO RESET SYNC
 // =====================================
 
-const COURIER_DEMO_KEY = "courierflow.courier.demo.v1";
+const ORDERS_KEY = "cms_orders";
 
 function syncCourierSidebarCounts() {
     const availEl = document.getElementById("availableCount");
     const activeEl = document.getElementById("activeCount");
     if (!availEl && !activeEl) return;
 
-    let availCount = 3;
-    let activeCount = 2;
-
-    try {
-        const raw = localStorage.getItem(COURIER_DEMO_KEY);
-        if (raw) {
-            const parsed = JSON.parse(raw);
-            if (parsed && parsed.jobs && typeof parsed.jobs === "object") {
-                const statuses = Object.values(parsed.jobs).map(j => j && j.status);
-                availCount = statuses.filter(s => s === "available").length;
-                activeCount = statuses.filter(s => s === "accepted" || s === "picked_up").length;
-            }
-        }
-    } catch {
-        // Fallback to default seed counts
-    }
+    const orders = getSharedOrders();
+    const availCount = orders.filter(function(order) {
+        return order && order.status === "Initiated";
+    }).length;
+    const activeCount = orders.filter(function(order) {
+        return order && order.status === "In Progress";
+    }).length;
 
     if (availEl) availEl.textContent = String(availCount);
     if (activeEl) activeEl.textContent = String(activeCount);
@@ -655,12 +518,17 @@ function syncCourierSidebarCounts() {
 const resetDemoBtn = document.getElementById("resetDemo");
 if (resetDemoBtn) {
     resetDemoBtn.addEventListener("click", function() {
-        if (!confirm("Reset demo data?\nThis replaces only CourierFlow courier demo progress in this browser with the original sample deliveries.")) {
+        if (!confirm("Reset demo data?\nThis restores shared vehicles, orders, and route assignments in this browser to the original sample dataset.")) {
             return;
         }
-        localStorage.removeItem(COURIER_DEMO_KEY);
-        localStorage.removeItem("cms_route_assignments");
+        saveVehicles(defaultSeedVehicles());
+        localStorage.setItem("cms_vehicles_seeded_v4", "1");
+        saveSharedOrders(defaultSeedOrders());
+        localStorage.setItem("cms_orders_seeded_v4", "1");
+        localStorage.setItem("cms_route_assignments", JSON.stringify(defaultRouteAssignments()));
         syncCourierSidebarCounts();
+        renderVehicles();
+        showVehicleMessage("Demo data has been reset.", "success");
     });
 }
 
@@ -691,12 +559,12 @@ renderCourierHeaderIdentity();
 syncCourierSidebarCounts();
 renderVehicles();
 
-// Refresh if another tab updates the vehicles or courier demo state
+// Refresh if another tab updates the vehicles or shared orders state
 window.addEventListener("storage", function(event) {
-    if (event.key === VEHICLE_KEY) {
+    if (event.key === VEHICLE_KEY || event.key === null) {
         renderVehicles();
     }
-    if (event.key === COURIER_DEMO_KEY || event.key === null) {
+    if (event.key === ORDERS_KEY || event.key === null) {
         syncCourierSidebarCounts();
     }
 });

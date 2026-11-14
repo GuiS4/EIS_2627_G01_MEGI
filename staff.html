@@ -14,6 +14,7 @@
 
     <link rel="stylesheet" href="css/adminstyle.css">
 
+    <script defer src="js/main.js"></script>
     <script defer src="js/staff.js"></script>
 
 </head>
@@ -75,10 +76,6 @@
 
             <a href="#fleet" data-nav="fleet">
                 <span aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="14" height="12" rx="1"></rect><polygon points="15 8 19.5 8 23 11.5 23 16 15 16 15 8"></polygon><circle cx="5.5" cy="18.5" r="2.2"></circle><circle cx="18.5" cy="18.5" r="2.2"></circle></svg></span> Vehicle Approvals <b id="navVehicleCount">0</b>
-            </a>
-
-            <a href="#parcels" data-nav="parcels">
-                <span aria-hidden="true">□</span> Parcels
             </a>
 
         </nav>
@@ -314,89 +311,6 @@
 
             </section>
 
-            <!-- PARCEL ASSIGNMENTS -->
-
-            <section id="parcels">
-
-                <div class="section-heading">
-
-                    <div>
-
-                        <p class="tag">
-                            DELIVERY ASSIGNMENTS
-                        </p>
-
-                        <h2>Parcels</h2>
-
-                        <p class="description">
-                            Monitor active deliveries and assign approved couriers to parcels.
-                        </p>
-
-                    </div>
-
-                    <label>
-                        Status
-                        <select id="parcelFilter">
-
-                            <option value="all">All parcels</option>
-
-                            <option value="unassigned">Unassigned</option>
-
-                            <option value="accepted">Accepted</option>
-
-                            <option value="picked_up">Picked up</option>
-
-                            <option value="delivered">Delivered</option>
-
-                        </select>
-                    </label>
-
-                </div>
-
-                <div class="table-wrap">
-
-                    <table>
-
-                        <caption class="sr-only">
-                            Parcels and assigned couriers
-                        </caption>
-
-                        <thead>
-
-                            <tr>
-
-                                <th scope="col">
-                                    Parcel
-                                </th>
-
-                                <th scope="col">
-                                    Route
-                                </th>
-
-                                <th scope="col">
-                                    Status
-                                </th>
-
-                                <th scope="col">
-                                    Courier
-                                </th>
-
-                                <th scope="col">
-                                    Assignment
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody id="parcelList"></tbody>
-
-                    </table>
-
-                </div>
-
-            </section>
-
             <footer>
                 CourierFlow
                 <button id="resetDemo" class="text-button">
@@ -582,55 +496,6 @@
 
                 <button type="submit" class="btn btn-primary">
                     Save updated documents
-                </button>
-
-            </div>
-
-        </form>
-
-    </dialog>
-
-    <!-- ASSIGNMENT EDITOR -->
-
-    <dialog id="assignmentDialog" aria-labelledby="assignmentTitle">
-
-        <form id="assignmentForm">
-
-            <div class="dialog-heading">
-
-                <h2 id="assignmentTitle">Change assignment</h2>
-
-                <button
-                    type="button"
-                    class="icon-button"
-                    data-close="assignmentDialog"
-                    aria-label="Close">
-                    ×
-                </button>
-
-            </div>
-
-            <p id="assignmentDescription" class="description"></p>
-
-            <input type="hidden" name="kind">
-
-            <input type="hidden" name="target">
-
-            <label id="assignmentLabel">
-                Choose assignment
-                <select name="selection" id="assignmentSelect"></select>
-            </label>
-
-            <p id="assignmentError" class="form-error" role="alert"></p>
-
-            <div class="dialog-actions">
-
-                <button type="button" class="btn btn-outline" data-close="assignmentDialog">
-                    Cancel
-                </button>
-
-                <button type="submit" class="btn btn-primary">
-                    Save assignment
                 </button>
 
             </div>

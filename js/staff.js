@@ -173,170 +173,8 @@
             approval_status: 'Pending',
             approved_by: null,
             createdAt: '2026-11-11T10:05:00.000Z'
-        }],
-        parcels: [{
-            id: 'CF-1041',
-            item: 'Documents',
-            pickup: 'Praça da Liberdade, Porto',
-            drop: 'Praça da Ribeira, Porto',
-            status: 'unassigned',
-            courierId: null
-        }, {
-            id: 'CF-1042',
-            item: 'Clothing',
-            pickup: 'Rua de Santa Catarina, Porto',
-            drop: 'Rua de Dom Manuel II, Porto',
-            status: 'accepted',
-            courierId: 'CR-001'
-        }, {
-            id: 'CF-1043',
-            item: 'Electronics',
-            pickup: 'Praça de Mouzinho de Albuquerque, Porto',
-            drop: 'Avenida dos Aliados, Porto',
-            status: 'unassigned',
-            courierId: null
-        }, {
-            id: 'CF-1044',
-            item: 'Books',
-            pickup: 'Rua das Carmelitas, Porto',
-            drop: 'Campo 24 de Agosto, Porto',
-            status: 'accepted',
-            courierId: 'CR-001'
-        }, {
-            id: 'CF-1039',
-            item: 'Art supplies',
-            pickup: 'Rua de Cedofeita, Porto',
-            drop: 'Rua de Miguel Bombarda, Porto',
-            status: 'picked_up',
-            courierId: 'CR-002'
-        }, {
-            id: 'CF-1036',
-            item: 'Documents',
-            pickup: 'Rua de Júlio Dinis, Porto',
-            drop: 'Praça da Trindade, Porto',
-            status: 'delivered',
-            courierId: 'CR-003'
         }]
     });
-
-    function defaultSeedVehicles() {
-        return [
-            {
-                id: 'V-001',
-                courier_id: 'CR-001',
-                submitted_by_courier_id: 'CR-001',
-                submitted_by_courier_name: 'Alex Silva',
-                type_name: 'Van',
-                model: 'Renault Kangoo',
-                license_plate: 'AA-12-CF',
-                max_weight_kg: 650,
-                max_vol_m3: 3.3,
-                insurance_expiry_date: '2027-08-15',
-                inspection_expiry_date: '2027-06-20',
-                insurance_expiry_doc: 'kangoo_insurance.pdf',
-                inspection_expiry_doc: 'kangoo_inspection.pdf',
-                approval_status: 'Approved',
-                approved_by: 'Staff (staff@staff.demo)',
-                doc_updated_at: '2026-10-15T10:00:00.000Z',
-                created_at: '2026-10-10T09:00:00.000Z'
-            },
-            {
-                id: 'V-002',
-                courier_id: 'CR-002',
-                submitted_by_courier_id: 'CR-002',
-                submitted_by_courier_name: 'Maria Costa',
-                type_name: 'Van',
-                model: 'Peugeot Partner',
-                license_plate: 'AB-34-CF',
-                max_weight_kg: 750,
-                max_vol_m3: 3.7,
-                insurance_expiry_date: '2027-09-10',
-                inspection_expiry_date: '2027-07-01',
-                insurance_expiry_doc: 'partner_insurance.pdf',
-                inspection_expiry_doc: 'partner_inspection.pdf',
-                approval_status: 'Approved',
-                approved_by: 'Staff (staff@staff.demo)',
-                doc_updated_at: '2026-10-16T11:30:00.000Z',
-                created_at: '2026-10-12T14:20:00.000Z'
-            },
-            {
-                id: 'V-003',
-                courier_id: 'CR-001',
-                submitted_by_courier_id: 'CR-001',
-                submitted_by_courier_name: 'Alex Silva',
-                type_name: 'Motorcycle',
-                model: 'Honda PCX 125',
-                license_plate: 'MC-11-CF',
-                max_weight_kg: 2.0,
-                max_vol_m3: 0.003,
-                insurance_expiry_date: '2027-05-12',
-                inspection_expiry_date: '2027-04-18',
-                insurance_expiry_doc: 'pcx_insurance.pdf',
-                inspection_expiry_doc: 'pcx_inspection.pdf',
-                approval_status: 'Approved',
-                approved_by: 'Staff (staff@staff.demo)',
-                doc_updated_at: '2026-10-18T08:15:00.000Z',
-                created_at: '2026-10-18T08:00:00.000Z'
-            },
-            {
-                id: 'V-004',
-                courier_id: 'CR-002',
-                submitted_by_courier_id: 'CR-002',
-                submitted_by_courier_name: 'Maria Costa',
-                type_name: 'Bicycle',
-                model: 'Urban Cargo Bike',
-                license_plate: 'BK-05-CF',
-                max_weight_kg: 1.0,
-                max_vol_m3: 0.0018,
-                insurance_expiry_date: '2027-11-30',
-                inspection_expiry_date: '2027-11-30',
-                insurance_expiry_doc: 'bike_insurance.pdf',
-                inspection_expiry_doc: 'bike_inspection.pdf',
-                approval_status: 'Approved',
-                approved_by: 'Staff (staff@staff.demo)',
-                doc_updated_at: '2026-10-20T09:45:00.000Z',
-                created_at: '2026-10-19T16:10:00.000Z'
-            },
-            {
-                id: 'V-005',
-                courier_id: 'CR-003',
-                submitted_by_courier_id: 'CR-003',
-                submitted_by_courier_name: 'Daniel Santos',
-                type_name: 'Van',
-                model: 'Citroën Berlingo',
-                license_plate: 'AC-56-CF',
-                max_weight_kg: 650,
-                max_vol_m3: 3.3,
-                insurance_expiry_date: '2026-11-28',
-                inspection_expiry_date: '2027-08-22',
-                insurance_expiry_doc: 'berlingo_insurance.pdf',
-                inspection_expiry_doc: 'berlingo_inspection.pdf',
-                approval_status: 'Pending',
-                approved_by: null,
-                doc_updated_at: '2026-10-25T15:00:00.000Z',
-                created_at: '2026-10-25T15:00:00.000Z'
-            },
-            {
-                id: 'V-006',
-                courier_id: 'CR-004',
-                submitted_by_courier_id: 'CR-004',
-                submitted_by_courier_name: 'Sofia Pereira',
-                type_name: 'Van',
-                model: 'Fiat Fiorino',
-                license_plate: 'AD-78-CF',
-                max_weight_kg: 610,
-                max_vol_m3: 2.8,
-                insurance_expiry_date: '2026-04-10',
-                inspection_expiry_date: '2026-05-01',
-                insurance_expiry_doc: 'fiorino_insurance_2025.pdf',
-                inspection_expiry_doc: 'fiorino_inspection_2025.pdf',
-                approval_status: 'Pending',
-                approved_by: null,
-                doc_updated_at: '2026-11-01T12:00:00.000Z',
-                created_at: '2026-11-01T12:00:00.000Z'
-            }
-        ];
-    }
 
     let canSave = true;
     let toastTimer;
@@ -362,7 +200,7 @@
             const raw = localStorage.getItem(KEY);
             if (!raw) return seed();
             const data = JSON.parse(raw);
-            if (!data || !Array.isArray(data.couriers) || !Array.isArray(data.parcels)) {
+            if (!data || !Array.isArray(data.couriers)) {
                 return seed();
             }
             // Ensure approval_status exists on all couriers
@@ -452,42 +290,12 @@
         if (message) toast(message);
     }
 
-    const activeParcels = id => state.parcels.filter(p => p.courierId === id && p.status !== 'delivered');
-    const courierName = id => state.couriers.find(c => c.id === id)?.name || 'Unassigned';
-
     function getSubmittedVehicles() {
-        try {
-            const raw = localStorage.getItem('cms_vehicles');
-            const seededFlag = localStorage.getItem('cms_vehicles_seeded_v3_staff');
-            if (!raw) {
-                const initial = defaultSeedVehicles();
-                localStorage.setItem('cms_vehicles', JSON.stringify(initial));
-                localStorage.setItem('cms_vehicles_seeded_v3_staff', '1');
-                return initial;
-            }
-            const data = JSON.parse(raw);
-            const list = Array.isArray(data) ? data : [];
-            if (!seededFlag) {
-                const defaults = defaultSeedVehicles();
-                const existingPlates = new Set(list.map(v => (v.license_plate || '').toUpperCase()));
-                defaults.forEach(d => {
-                    if (!existingPlates.has(d.license_plate.toUpperCase())) {
-                        list.push(d);
-                    }
-                });
-                localStorage.setItem('cms_vehicles', JSON.stringify(list));
-                localStorage.setItem('cms_vehicles_seeded_v3_staff', '1');
-            }
-            return list;
-        } catch {
-            return defaultSeedVehicles();
-        }
+        return getSharedVehicles();
     }
 
     function saveSubmittedVehicles(list) {
-        try {
-            localStorage.setItem('cms_vehicles', JSON.stringify(list));
-        } catch {
+        if (!saveSharedVehicles(list)) {
             toast('Unable to save vehicle approval status.');
         }
     }
@@ -690,8 +498,7 @@
             ['Courier approvals', pendingCouriers, `${approvedCouriers} approved · ${state.couriers.length} total couriers`],
             ['Vehicle approvals', pendingVehicles, `${approvedVehicles} approved in shared pool`],
             ['Certificate alerts', flaggedVehicles, `${unreadCount} unread compliance notifications`],
-            ['Active parcels', state.parcels.filter(p => ['accepted', 'picked_up'].includes(p.status)).length,
-                `${state.parcels.filter(p => !p.courierId).length} unassigned parcels`]
+            ['Approved fleet pool', approvedVehicles, `${allVehicles.length} total submitted vehicles`]
         ];
 
         $('stats').innerHTML = data.map(([title, value, note]) =>
@@ -769,7 +576,6 @@
 
         $('courierList').innerHTML = found.map(c => {
             const submittedByCourier = allVehicles.filter(v => (v.submitted_by_courier_id || v.courier_id) === c.id);
-            const parcels = activeParcels(c.id);
             const initials = c.name.trim().split(/\s+/).map(w => Array.from(w)[0]).slice(0, 2).join('');
             const appStatus = c.approval_status || 'Approved';
 
@@ -795,9 +601,6 @@
 
                 <p class="card-label">Submitted vehicles · ${submittedByCourier.length}</p>
                 <div class="parcel-chips">${submittedByCourier.length ? submittedByCourier.map(v => `<span class="parcel-chip">${esc(v.model)} (${esc(v.license_plate)}) · ${esc(v.approval_status)}</span>`).join('') : '<p class="small">No vehicles submitted</p>'}</div>
-
-                <p class="card-label">Active parcels · ${parcels.length}</p>
-                <div class="parcel-chips">${parcels.length ? parcels.map(p => `<a class="parcel-chip" href="#parcel-${p.id}">${p.id} · ${statuses[p.status]}</a>`).join('') : '<p class="small">No active parcels</p>'}</div>
 
                 ${c.approved_by ? `<p class="small" style="margin-bottom: 6px;">Reviewed by: <strong>${esc(c.approved_by)}</strong></p>` : ''}
 
@@ -919,24 +722,12 @@
         }).join('');
     }
 
-    function renderParcels() {
-        const filter = $('parcelFilter') ? $('parcelFilter').value : 'all';
-        const found = state.parcels.filter(p => filter === 'all' || p.status === filter);
-        $('parcelList').innerHTML = found.map(p => `<tr id="parcel-${p.id}">
-            <td><strong>${p.id}</strong><p class="small">${esc(p.item)}</p></td>
-            <td class="route">${esc(p.pickup)}<span>→ ${esc(p.drop)}</span></td>
-            <td>${badge(p.status)}</td><td>${esc(courierName(p.courierId))}</td>
-            <td>${p.status === 'delivered' ? '<span class="small">Completed</span>' : `<button class="btn btn-outline" data-action="parcel" data-id="${p.id}" aria-label="Assign courier to ${p.id}">${p.courierId ? 'Change' : 'Assign'}</button>`}</td>
-        </tr>`).join('') || '<tr><td colspan="5">No parcels in this view.</td></tr>';
-    }
-
     function render() {
         syncRegisteredCouriersFromUsers();
         renderStats();
         renderNotifications();
         renderCouriers();
         renderVehicles();
-        renderParcels();
     }
 
     // =========================================================================
@@ -1050,9 +841,6 @@
         if (!data.name || !/^[+0-9() .-]{5,30}$/.test(data.phone) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
             return error('Enter a full name, a valid phone number and a valid email address.');
         }
-        if (data.status === 'offline' && existing && activeParcels(existing.id).length) {
-            return error('Reassign active parcels to another courier first.');
-        }
         if (state.couriers.some(c => c.id !== data.id && c.email.toLowerCase() === data.email.toLowerCase())) {
             return error('This email address is already assigned to another courier.');
         }
@@ -1072,62 +860,6 @@
         save(existing ? 'Courier details updated.' : 'New courier added.');
     });
 
-    function assignment(kind, id) {
-        if (kind !== 'parcel') return;
-        const form = $('assignmentForm');
-        const select = $('assignmentSelect');
-        form.elements.namedItem('kind').value = kind;
-        form.elements.namedItem('target').value = id;
-        $('assignmentError').textContent = '';
-
-        const target = state.parcels.find(x => x.id === id);
-        if (!target || target.status === 'delivered') return;
-
-        $('assignmentTitle').textContent = 'Assign parcel';
-        $('assignmentDescription').textContent =
-            `${target.id} · ${target.item}. Only Approved and available couriers can be selected.`;
-
-        const current = target.courierId || '';
-        const options = state.couriers.map(c => {
-            const isApproved = (c.approval_status || 'Approved') === 'Approved';
-            return {
-                id: c.id,
-                label: `${c.name} · ${isApproved ? statuses[c.status] : (c.approval_status || 'Pending')}`,
-                disabled: c.status === 'offline' || !isApproved
-            };
-        });
-
-        select.innerHTML =
-            `<option value="" ${target.status === 'picked_up' ? 'disabled' : ''}>Unassigned</option>` +
-            options.map(o =>
-                `<option value="${o.id}" ${o.disabled ? 'disabled' : ''}>${esc(o.label)}</option>`).join('');
-        select.value = current;
-        $('assignmentDialog').showModal();
-    }
-
-    $('assignmentForm')?.addEventListener('submit', event => {
-        event.preventDefault();
-        const { kind, target, selection } = Object.fromEntries(new FormData(event.currentTarget));
-        const error = message => {
-            $('assignmentError').textContent = message;
-        };
-        if (kind === 'parcel') {
-            const parcel = state.parcels.find(p => p.id === target);
-            if (!parcel || parcel.status === 'delivered') return error('This parcel cannot be changed.');
-            const courier = state.couriers.find(c => c.id === selection);
-            if (selection && (!courier || courier.status === 'offline' || (courier.approval_status || 'Approved') !== 'Approved')) {
-                return error('Select an approved and available courier.');
-            }
-            if (!selection && parcel.status === 'picked_up') {
-                return error('A picked-up parcel must have an assigned courier.');
-            }
-            parcel.courierId = selection || null;
-            if (parcel.status !== 'picked_up') parcel.status = selection ? 'accepted' : 'unassigned';
-        }
-        $('assignmentDialog').close();
-        save('Assignment saved.');
-    });
-
     function confirmAction(title, text) {
         $('confirmTitle').textContent = title;
         $('confirmText').textContent = text;
@@ -1140,10 +872,6 @@
     async function deleteCourier(id) {
         const courier = state.couriers.find(c => c.id === id);
         if (!courier) return;
-        if (state.parcels.some(p => p.courierId === id)) {
-            toast('A courier with assigned parcels cannot be deleted. Reassign their active deliveries first.');
-            return;
-        }
         if (!await confirmAction('Delete courier?', `${courier.name} will be deleted from the courier directory.`)) return;
         state.couriers = state.couriers.filter(c => c.id !== id);
         save('Courier deleted.');
@@ -1173,7 +901,7 @@
             if ($('certificateFilter')) $('certificateFilter').value = 'all';
             renderVehicles();
             requestAnimationFrame(() => document.getElementById(`vehicle-${id}`)?.scrollIntoView({ behavior: 'smooth' }));
-        } else assignment(action, id);
+        }
     });
 
     $('addCourier')?.addEventListener('click', () => editCourier());
@@ -1185,16 +913,15 @@
     $('vehicleSearch')?.addEventListener('input', renderVehicles);
     $('approvalFilter')?.addEventListener('change', renderVehicles);
     $('certificateFilter')?.addEventListener('change', renderVehicles);
-    $('parcelFilter')?.addEventListener('change', renderParcels);
 
     $('resetDemo')?.addEventListener('click', async () => {
         if (!await confirmAction('Reset Staff demo data?',
-                'Couriers, parcel assignments, vehicle submissions and certificate alerts will return to their initial values.'
+                'Couriers, vehicle submissions and certificate alerts will return to their initial values.'
             )) return;
         state = seed();
         try {
-            localStorage.setItem('cms_vehicles', JSON.stringify(defaultSeedVehicles()));
-            localStorage.setItem('cms_vehicles_seeded_v3_staff', '1');
+            saveSharedVehicles(defaultSeedVehicles());
+            localStorage.setItem('cms_vehicles_seeded_v4', '1');
             localStorage.removeItem(NOTIF_KEY);
             localStorage.removeItem('cms_staff_read_alerts');
         } catch { /* ignore */ }
@@ -1206,7 +933,6 @@
         if ($('vehicleSearch')) $('vehicleSearch').value = '';
         if ($('approvalFilter')) $('approvalFilter').value = 'all';
         if ($('certificateFilter')) $('certificateFilter').value = 'all';
-        if ($('parcelFilter')) $('parcelFilter').value = 'all';
         if ($('notifFilter')) $('notifFilter').value = 'all';
         save('Staff demo data restored.');
     });
@@ -1215,17 +941,11 @@
         const section = location.hash.slice(1) || 'overview';
         document.querySelectorAll('[data-nav]').forEach(link => {
             const active = link.dataset.nav === section ||
-                (section.startsWith('parcel-') && link.dataset.nav === 'parcels') ||
                 (section.startsWith('vehicle-') && link.dataset.nav === 'fleet');
             link.classList.toggle('active', active);
             if (active) link.setAttribute('aria-current', 'location');
             else link.removeAttribute('aria-current');
         });
-        if (section.startsWith('parcel-')) {
-            if ($('parcelFilter')) $('parcelFilter').value = 'all';
-            renderParcels();
-            requestAnimationFrame(() => document.getElementById(section)?.scrollIntoView());
-        }
     }
 
     window.addEventListener('hashchange', nav);

@@ -34,6 +34,7 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""></script>
 
+    <script defer src="js/main.js"></script>
     <script defer src="js/courier.js"></script>
 
 </head>
@@ -327,7 +328,7 @@
                         <div class="active-toolbar">
 
                             <label class="compact-label">
-                                Status<select id="activeFilter"><option value="all">All active</option><option value="accepted">Accepted</option><option value="picked_up">Picked up</option></select>
+                                Status<select id="activeFilter"><option value="all">All active</option><option value="In Progress">In Progress</option></select>
                             </label>
 
                         </div>
@@ -449,8 +450,15 @@
                 </button>
             </div>
 
+            <div style="margin-top: 10px; font-size: 0.88rem; color: #475569;">
+                <label for="podPhotoInput" style="display: block; font-weight: 600; margin-bottom: 4px;">
+                    Or upload a delivery photo (e-POD):
+                </label>
+                <input type="file" id="podPhotoInput" accept="image/*">
+            </div>
+
             <p id="signatureError" class="signature-error-msg" hidden>
-                ⚠ Signature is required. Cannot complete delivery without proof of delivery.
+                ⚠ Signature or delivery photo is required. Cannot complete delivery without proof of delivery.
             </p>
 
             <div class="dialog-actions">

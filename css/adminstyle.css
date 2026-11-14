@@ -200,6 +200,16 @@ nav b {
     font-size: 11px;
 }
 
+.sidebar-about {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+}
+
+.sidebar-about .nav-label {
+    margin-bottom: 10px;
+}
+
 .sidebar-note {
     margin-top: auto;
     padding: 28px 12px 0;
@@ -866,6 +876,11 @@ dialog label {
         display: flex;
         overflow-x: auto;
         gap: 4px;
+    }
+
+    .sidebar-about {
+        margin-top: 6px;
+        padding-top: 6px;
     }
 
     nav a {

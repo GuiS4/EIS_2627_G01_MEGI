@@ -223,6 +223,16 @@ button:disabled {
     border-radius: 5px
 }
 
+.sidebar-about {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line)
+}
+
+.sidebar-about .nav-label {
+    margin-bottom: 10px
+}
+
 .sidebar-note {
     margin-top: auto;
     padding: 28px 12px 0;
@@ -1337,6 +1347,11 @@ footer span {
         display: flex;
         gap: 4px;
         overflow-x: auto
+    }
+
+    .sidebar-about {
+        margin-top: 6px;
+        padding-top: 6px;
     }
 
     .sidebar-links li {

@@ -3,29 +3,6 @@
    CLIENT DASHBOARD
 ================================ */
 
-.client-main {
-    margin-left: 230px;
-    padding-top: 120px;
-    padding-bottom: 60px;
-    min-height: 100vh;
-    background: #f7f9fc;
-}
-
-.client-section {
-    margin-bottom: 55px;
-    scroll-margin-top: 110px;
-}
-
-.client-section h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-}
-
-.client-section h2 {
-    font-size: 1.8rem;
-    margin-bottom: 10px;
-}
-
 .client-intro,
 .section-description {
     color: #64748b;
@@ -188,4 +165,269 @@
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 600;
+}
+
+/* ================================
+   CLIENT PAGE (body.client-page)
+   Built on top of the shared courier layout (css/courier.css)
+================================ */
+
+/* Two-column layouts */
+
+.client-two-col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    align-items: start;
+}
+
+.client-order-layout {
+    display: grid;
+    grid-template-columns: minmax(320px, 520px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.client-order-layout .map-card {
+    position: sticky;
+    top: 100px;
+    z-index: 10;
+}
+
+/* Map (fixes the broken/zero-size map: explicit size, no legacy margins) */
+
+.client-page #orderMap {
+    width: 100%;
+    height: 480px;
+    min-height: 340px;
+    max-height: calc(100vh - 270px);
+    margin: 0;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: #edf1f6;
+    z-index: 1;
+}
+
+.client-page #orderMap.map-unavailable {
+    height: 340px;
+}
+
+/* Cards and forms (same look as the Vehicles registration form) */
+
+.client-card form {
+    max-width: none;
+}
+
+.client-card > h3:first-child {
+    margin-top: 0;
+}
+
+.client-card form > h3 {
+    margin: 26px 0 16px;
+    font-size: 15px;
+}
+
+.client-card .form-group {
+    margin-bottom: 18px;
+}
+
+.client-card .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.client-card .form-group input:not([type="checkbox"]) {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid #d8dee9;
+    border-radius: 8px;
+    background: white;
+    color: #172033;
+    font: inherit;
+}
+
+.client-card .form-group select {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 40px 12px 14px;
+    border-radius: 8px;
+    color: #172033;
+    font: inherit;
+}
+
+.client-card .form-group input:focus,
+.client-card .form-group select:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+.client-card .form-row {
+    gap: 20px;
+}
+
+/* Product dropdown inside the order form */
+
+.client-dropdown {
+    position: relative;
+}
+
+.client-dropdown > summary {
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+    width: 100%;
+    min-height: 43px;
+    padding: 12px 40px 12px 14px;
+    border: 1px solid #d8dee9;
+    border-radius: 8px;
+    background-color: white;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23172033' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 14px 14px;
+    color: #172033;
+    font-size: 1rem;
+    font-weight: 400;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.client-dropdown > summary::-webkit-details-marker {
+    display: none;
+}
+
+.client-dropdown[open] > summary,
+.client-dropdown > summary:focus-visible {
+    border-color: #2563eb;
+    outline: none;
+}
+
+.client-dropdown .product-selection {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 20;
+    max-height: 260px;
+    overflow-y: auto;
+    margin: 0;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
+}
+
+.client-page .product-selection {
+    margin-top: 0;
+}
+
+.client-page .product-option {
+    font-size: 0.95rem;
+    color: #172033;
+    font-weight: 500;
+}
+
+.client-page .product-option input {
+    width: 18px;
+    height: 18px;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.client-page .product-option small {
+    color: #64748b;
+}
+
+/* Registered products list */
+
+.client-product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.client-product-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.client-product-row strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.client-remove {
+    min-height: 34px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #b91c1c;
+    border-color: #fecaca;
+    flex-shrink: 0;
+}
+
+.client-remove:hover {
+    background: #fef2f2;
+}
+
+/* Order details */
+
+.client-order-products {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.client-order-products li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #f8fafc;
+    font-size: 13px;
+}
+
+.client-order-products span {
+    color: #64748b;
+    text-align: right;
+}
+
+.status-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+@media (max-width: 1100px) {
+    .client-two-col,
+    .client-order-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .client-order-layout .map-card {
+        position: static;
+    }
+}
+
+@media (max-width: 600px) {
+    .client-card .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .client-product-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }

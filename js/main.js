@@ -272,6 +272,23 @@ if (loginForm) {
             return;
         }
 
+        // Client demo access
+        if (email === "client@client.demo" && password === "Client123!") {
+            sessionStorage.setItem("courierflow.demo.role", "client");
+            sessionStorage.setItem(
+                "cms_current_user",
+                JSON.stringify({
+                    id: "CL-001",
+                    name: "Demo Client",
+                    username: "democlient",
+                    email: "client@client.demo",
+                    role: "client"
+                })
+            );
+            window.location.href = "client.html";
+            return;
+        }
+
         // Clear any previous demo role session
         sessionStorage.removeItem("courierflow.demo.role");
 

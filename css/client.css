@@ -183,7 +183,7 @@
 
 .client-order-layout {
     display: grid;
-    grid-template-columns: minmax(320px, 520px) minmax(0, 1fr);
+    grid-template-columns: minmax(280px, 520px) minmax(0, 1fr);
     gap: 24px;
     align-items: start;
 }
@@ -429,5 +429,18 @@
     .client-product-row {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .client-page #orderMap {
+        height: 320px;
+        min-height: 280px;
+    }
+
+    .client-order-products li {
+        flex-wrap: wrap;
+    }
+
+    .client-order-products span {
+        text-align: left;
     }
 }

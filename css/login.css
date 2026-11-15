@@ -188,3 +188,25 @@
 
     font-size: 0.9rem;
 }
+
+@media (max-width: 767px) {
+
+    .auth-main {
+        padding-top: 90px;
+        padding-bottom: 36px;
+        align-items: flex-start;
+    }
+
+    .auth-card {
+        padding: 28px 20px;
+    }
+
+    .auth-heading h1 {
+        font-size: 1.65rem;
+    }
+
+    .form-options {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}

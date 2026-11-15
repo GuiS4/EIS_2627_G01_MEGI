@@ -7,6 +7,7 @@
     <title>Courier Management System</title>
 
     <link rel="stylesheet" href="css/style.css" />
+    <script defer src="js/main.js"></script>
   </head>
   <body>
     <!-- NAVIGATION -->
@@ -22,41 +23,47 @@
 
     <!-- SIDE NAVIGATION -->
     <aside class="sidebar">
-      <nav>
+      <p class="nav-label">NAVIGATION</p>
+
+      <nav aria-label="Main navigation">
         <ul class="sidebar-links">
           <li>
             <a href="index.html" class="active">
-              <span class="nav-icon">⌂</span>
-              <span>Home</span>
+              <span aria-hidden="true">⌂</span> Home
             </a>
           </li>
 
           <li>
             <a href="#services">
-              <span class="nav-icon">▦</span>
-              <span>Services</span>
+              <span aria-hidden="true">▦</span> Services
             </a>
           </li>
 
           <li>
             <a href="#stats">
-              <span class="nav-icon">ⓘ</span>
-              <span>About</span>
+              <span aria-hidden="true">ⓘ</span> About
             </a>
           </li>
         </ul>
       </nav>
 
       <div class="sidebar-about">
-        <p class="sidebar-about-label">ABOUT</p>
+        <p class="nav-label">ABOUT</p>
         <ul class="sidebar-links">
           <li>
             <a href="teams.html">
-              <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
-              <span>Teams</span>
+              <span aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+              Teams
             </a>
           </li>
         </ul>
+      </div>
+
+      <div class="sidebar-note">
+        <strong>Enterprise Information Systems</strong>
+        <p>
+          Courier Management System<br />FEUP · MEGI Project
+        </p>
       </div>
     </aside>
 

@@ -40,10 +40,6 @@
 
         <div class="header-actions" id="teamsHeaderActions">
 
-            <a href="index.html" class="btn btn-outline">
-                Home
-            </a>
-
             <a href="login.html" class="btn btn-outline">
                 Login
             </a>
@@ -393,6 +389,14 @@
                 }
             };
 
+            try {
+                var ref = (document.referrer || "").split("?")[0].split("#")[0].split("/").pop().toLowerCase();
+                if (ref === "index.html" || ref === "login.html" || ref === "register.html") {
+                    sessionStorage.removeItem("cms_current_user");
+                    sessionStorage.removeItem("courierflow.demo.role");
+                }
+            } catch (_) {}
+
             var user = null;
             try {
                 user = JSON.parse(sessionStorage.getItem("cms_current_user") || "null");
@@ -420,12 +424,20 @@
 
                 headerActions.innerHTML =
                     '<a href="' + cfg.url + '" class="btn btn-outline">Dashboard</a>' +
-                    '<a href="login.html" class="btn btn-primary">Logout</a>' +
+                    '<a href="login.html" class="btn btn-primary" id="teamsLogoutBtn">Logout</a>' +
                     '<span class="workspace-label"></span>' +
                     '<span class="avatar" aria-hidden="true"></span>';
 
                 headerActions.querySelector(".workspace-label").textContent = roleTitle + " · " + displayName;
                 headerActions.querySelector(".avatar").textContent = initials;
+
+                var logoutBtn = document.getElementById("teamsLogoutBtn");
+                if (logoutBtn) {
+                    logoutBtn.addEventListener("click", function () {
+                        sessionStorage.removeItem("cms_current_user");
+                        sessionStorage.removeItem("courierflow.demo.role");
+                    });
+                }
             }
         })();
     </script>

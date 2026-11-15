@@ -452,4 +452,14 @@
     .vehicle-card {
         padding: 20px;
     }
+
+    .vehicle-summary-left {
+        flex-wrap: wrap;
+    }
+
+    .vehicle-form-group input[type="file"] {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }

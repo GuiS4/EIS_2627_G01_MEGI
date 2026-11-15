@@ -7,6 +7,35 @@
 // Sprint 1 frontend prototype only
 // =====================================
 
+(function syncPublicAndLogoutSession() {
+    try {
+        const page = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+        if (page === "" || page === "index.html" || page === "login.html" || page === "register.html") {
+            sessionStorage.removeItem("cms_current_user");
+            sessionStorage.removeItem("courierflow.demo.role");
+        }
+        document.querySelectorAll('a[href="login.html"], #logoutBtn').forEach(function (link) {
+            if (link.id === "logoutBtn" || /logout/i.test(link.textContent || "")) {
+                link.addEventListener("click", function () {
+                    sessionStorage.removeItem("cms_current_user");
+                    sessionStorage.removeItem("courierflow.demo.role");
+                });
+            }
+        });
+        if (page === "" || page === "index.html") {
+            const homeNavLinks = document.querySelectorAll('.sidebar nav .sidebar-links a');
+            homeNavLinks.forEach(function (link) {
+                link.addEventListener("click", function () {
+                    homeNavLinks.forEach(function (l) { l.classList.remove("active"); });
+                    link.classList.add("active");
+                });
+            });
+        }
+    } catch (_) {
+        // Ignore sessionStorage errors
+    }
+})();
+
 function getUsers() {
     return JSON.parse(
         localStorage.getItem("cms_users") || "[]"

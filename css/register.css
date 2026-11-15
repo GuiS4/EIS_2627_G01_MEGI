@@ -44,3 +44,16 @@
 .form-group select:focus {
     border-color: #2563eb;
 }
+
+@media (max-width: 767px) {
+
+    .register-main {
+        padding-top: 95px;
+        padding-bottom: 40px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}

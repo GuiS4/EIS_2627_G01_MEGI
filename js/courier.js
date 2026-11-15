@@ -125,6 +125,10 @@
         orders = getSharedOrders();
         const job = orders.find(j => j.id === orderId);
         if (!job) return false;
+        if (job.status !== 'Initiated') {
+            toast('Vehicle cannot be changed after accepting the order.');
+            return false;
+        }
         const approved = getApprovedVehicles();
         const vehicle = approved.find(v => String(v.id) === String(vehicleId));
         if (!vehicle) {
@@ -282,8 +286,8 @@
             <div class="route-vehicle-box">
                 <div class="route-vehicle-header">
                     <div>
-                        <h4>Vehicle selection for route · ${esc(job.id)}</h4>
-                        <p class="subtle">Shared approved pool — select a compatible vehicle for this order/route.</p>
+                        <h4>Vehicle selection for route · ${esc(job.id)} <span style="color:#dc2626;">*</span></h4>
+                        <p class="subtle">Required — select a compatible approved vehicle before accepting this delivery.</p>
                     </div>
                     <span class="route-req-pill">Order total: <strong>${totals.weight_kg} kg</strong> · <strong>${totals.volume_m3} m³</strong></span>
                 </div>
@@ -382,7 +386,8 @@
                 ${renderVehicleSelector(job)}
 
                 <div class="active-action-container">
-                    <button class="btn btn-primary detail-action" data-advance="${esc(job.id)}" data-expected="Initiated">
+                    ${!assignedVehicle ? '<p class="subtle" style="color:#b45309; font-weight:600; margin-bottom:8px;">⚠ Please select a compatible vehicle above to accept this delivery.</p>' : ''}
+                    <button class="btn btn-primary detail-action" data-advance="${esc(job.id)}" data-expected="Initiated" ${!assignedVehicle ? 'disabled title="Select a compatible vehicle first"' : ''}>
                         Start delivery (In Progress)
                     </button>
                 </div>
@@ -449,7 +454,6 @@
                     <span class="subtle">${esc(job.window)}</span>
                 </div>
 
-                ${renderVehicleSelector(job)}
                 ${renderRouteAssignmentSummary(job)}
 
                 <ol class="progress" aria-label="Delivery progress">
@@ -832,7 +836,6 @@
         return new Promise(resolve => {
             const dialog = $('signatureDialog');
             const canvas = $('signatureCanvas');
-            const photoInput = $('podPhotoInput');
             const clearBtn = $('clearSignatureBtn');
             const cancelBtn = $('cancelSignatureBtn');
             const confirmBtn = $('confirmSignatureBtn');
@@ -840,7 +843,6 @@
 
             $('signatureOrderCode').textContent = jobId;
             errorMsg.hidden = true;
-            if (photoInput) photoInput.value = '';
 
             dialog.showModal();
 
@@ -858,23 +860,6 @@
 
             let isDrawing = false;
             let hasDrawn = false;
-            let uploadedPhotoDataUrl = null;
-
-            if (photoInput) {
-                photoInput.onchange = () => {
-                    const file = photoInput.files && photoInput.files[0];
-                    if (!file) {
-                        uploadedPhotoDataUrl = null;
-                        return;
-                    }
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        uploadedPhotoDataUrl = typeof reader.result === 'string' ? reader.result : null;
-                        errorMsg.hidden = true;
-                    };
-                    reader.readAsDataURL(file);
-                };
-            }
 
             function getPos(e) {
                 const r = canvas.getBoundingClientRect();
@@ -919,8 +904,6 @@
             clearBtn.onclick = () => {
                 ctx.clearRect(0, 0, rect.width, rect.height);
                 hasDrawn = false;
-                uploadedPhotoDataUrl = null;
-                if (photoInput) photoInput.value = '';
                 errorMsg.hidden = true;
             };
 
@@ -931,11 +914,11 @@
             };
 
             confirmBtn.onclick = () => {
-                if (!hasDrawn && !uploadedPhotoDataUrl) {
+                if (!hasDrawn) {
                     errorMsg.hidden = false;
                     return;
                 }
-                const dataUrl = uploadedPhotoDataUrl || canvas.toDataURL('image/png');
+                const dataUrl = canvas.toDataURL('image/png');
                 cleanup();
                 dialog.close('confirm');
                 resolve(dataUrl);
@@ -953,7 +936,6 @@
                 canvas.onpointermove = null;
                 canvas.onpointerup = null;
                 canvas.onpointercancel = null;
-                if (photoInput) photoInput.onchange = null;
                 clearBtn.onclick = null;
                 cancelBtn.onclick = null;
                 confirmBtn.onclick = null;

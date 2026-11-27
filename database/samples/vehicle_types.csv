@@ -1,0 +1,5 @@
+name,max_weight_kg,max_volume_m3
+Bike,20,0.15
+Moto,40,0.30
+Van,1200,12
+Truck,5000,30
